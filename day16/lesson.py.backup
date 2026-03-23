@@ -1,0 +1,550 @@
+# -*- coding: utf-8 -*-
+"""
+Day 16: Day 16
+"""
+
+
+def section1():
+    """第一部分：测试数据管理"""
+    print("\n" + "="*60)
+    print("第一部分：测试数据管理")
+    print("="*60)
+    class TestDataManager:
+        """
+        测试数据管理器
+        支持JSON、YAML、CSV格式的测试数据
+        """
+        def __init__(self, data_dir="data"):
+            self.data_dir = Path(data_dir)
+            self.data_dir.mkdir(exist_ok=True)
+        def load_json(self, filename):
+            """加载JSON测试数据"""
+            file_path = self.data_dir / filename
+            with open(file_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        def save_json(self, filename, data):
+            """保存JSON测试数据"""
+            file_path = self.data_dir / filename
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+        def get_test_cases(self, filename, filter_func=None):
+            """
+            获取测试用例数据
+            参数:
+                filename: 数据文件名
+                filter_func: 过滤函数
+            """
+            data = self.load_json(filename)
+            test_cases = data.get("test_cases", [])
+            if filter_func:
+                test_cases = [tc for tc in test_cases if filter_func(tc)]
+            return test_cases
+        def get_test_data_by_name(self, filename, case_name):
+            """根据名称获取测试数据"""
+            test_cases = self.load_json(filename).get("test_cases", [])
+            for case in test_cases:
+                if case.get("name") == case_name:
+                    return case
+            return None
+    # 测试数据示例
+    TEST_DATA_EXAMPLE = {
+        "test_cases": [
+            {
+                "name": "正常登录",
+                "username": "admin",
+                "password": "123456",
+                "expected": "success",
+                "description": "使用正确的用户名密码登录"
+            },
+            {
+                "name": "错误密码",
+                "username": "admin",
+                "password": "wrong",
+                "expected": "fail",
+                "expected_message": "密码错误",
+                "description": "使用错误的密码登录"
+            },
+            {
+                "name": "空用户名",
+                "username": "",
+                "password": "123456",
+                "expected": "fail",
+                "expected_message": "用户名不能为空",
+                "description": "用户名为空"
+            },
+            {
+                "name": "不存在用户",
+                "username": "notexist",
+                "password": "123456",
+                "expected": "fail",
+                "expected_message": "用户不存在",
+                "description": "用户不存在"
+            }
+        ]
+    }
+
+
+def section2():
+    """第二部分：断言封装"""
+    print("\n" + "="*60)
+    print("第二部分：断言封装")
+    print("="*60)
+    class AssertHelper:
+        """
+        断言辅助类
+        封装常用断言，提供友好的错误信息
+        """
+        @staticmethod
+        def assert_true(condition, message="断言失败"):
+            """断言为真"""
+            assert condition, message
+        @staticmethod
+        def assert_false(condition, message="断言失败"):
+            """断言为假"""
+            assert not condition, message
+        @staticmethod
+        def assert_equal(actual, expected, message=None):
+            """断言相等"""
+            if message is None:
+                message = f"期望值: {expected}, 实际值: {actual}"
+            assert actual == expected, message
+        @staticmethod
+        def assert_not_equal(actual, expected, message=None):
+            """断言不相等"""
+            if message is None:
+                message = f"期望不等于: {expected}, 实际值: {actual}"
+            assert actual != expected, message
+        @staticmethod
+        def assert_in(member, container, message=None):
+            """断言包含"""
+            if message is None:
+                message = f"期望包含: {member}, 实际: {container}"
+            assert member in container, message
+        @staticmethod
+        def assert_not_in(member, container, message=None):
+            """断言不包含"""
+            if message is None:
+                message = f"期望不包含: {member}, 实际: {container}"
+            assert member not in container, message
+        @staticmethod
+        def assert_is_none(value, message=None):
+            """断言为None"""
+            if message is None:
+                message = f"期望为None, 实际: {value}"
+            assert value is None, message
+        @staticmethod
+        def assert_is_not_none(value, message=None):
+            """断言不为None"""
+            if message is None:
+                message = "期望不为None"
+            assert value is not None, message
+        @staticmethod
+        def assert_text_contains(actual_text, expected_substring, message=None):
+            """断言文本包含子串"""
+            if message is None:
+                message = f"期望文本包含: '{expected_substring}', 实际: '{actual_text}'"
+            assert expected_substring in actual_text, message
+        @staticmethod
+        def assert_element_displayed(element, message="元素未显示"):
+            """断言元素显示"""
+            assert element.is_displayed(), message
+        @staticmethod
+        def assert_element_enabled(element, message="元素不可用"):
+            """断言元素可用"""
+            assert element.is_enabled(), message
+
+
+def section3():
+    """第三部分：页面对象实现"""
+    print("\n" + "="*60)
+    print("第三部分：页面对象实现")
+    print("="*60)
+    class BasePage:
+        """基础页面类"""
+        def __init__(self, driver):
+            self.driver = driver
+            self.assert_helper = AssertHelper()
+        def find_element(self, locator):
+            """查找元素"""
+            by, value = locator
+            # 实际: return self.driver.find_element(by, value)
+            return MockElement(by, value)
+        def click(self, locator):
+            """点击"""
+            element = self.find_element(locator)
+            element.click()
+        def send_keys(self, locator, text):
+            """输入"""
+            element = self.find_element(locator)
+            element.clear()
+            element.send_keys(text)
+        def get_text(self, locator):
+            """获取文本"""
+            element = self.find_element(locator)
+            return element.text
+    class LoginPage(BasePage):
+        """登录页面"""
+        # 元素定位器
+        USERNAME_INPUT = ("id", "com.example:id/username")
+        PASSWORD_INPUT = ("id", "com.example:id/password")
+        LOGIN_BUTTON = ("id", "com.example:id/login_button")
+        ERROR_MESSAGE = ("id", "com.example:id/error_message")
+        SUCCESS_MESSAGE = ("id", "com.example:id/success_message")
+        def input_username(self, username):
+            """输入用户名"""
+            self.send_keys(self.USERNAME_INPUT, username)
+            return self
+        def input_password(self, password):
+            """输入密码"""
+            self.send_keys(self.PASSWORD_INPUT, password)
+            return self
+        def click_login(self):
+            """点击登录"""
+            self.click(self.LOGIN_BUTTON)
+            return self
+        def login(self, username, password):
+            """完整登录流程"""
+            self.input_username(username)
+            self.input_password(password)
+            self.click_login()
+            return self
+        def get_error_message(self):
+            """获取错误信息"""
+            return self.get_text(self.ERROR_MESSAGE)
+        def get_success_message(self):
+            """获取成功信息"""
+            return self.get_text(self.SUCCESS_MESSAGE)
+        def is_login_successful(self):
+            """判断是否登录成功"""
+            try:
+                success_msg = self.get_success_message()
+                return "成功" in success_msg or "welcome" in success_msg.lower()
+            except:
+                return False
+    class HomePage(BasePage):
+        """首页"""
+        WELCOME_MESSAGE = ("id", "com.example:id/welcome_message")
+        LOGOUT_BUTTON = ("id", "com.example:id/logout_button")
+        def get_welcome_text(self):
+            """获取欢迎文本"""
+            return self.get_text(self.WELCOME_MESSAGE)
+        def click_logout(self):
+            """点击退出"""
+            self.click(self.LOGOUT_BUTTON)
+            return LoginPage(self.driver)
+        def is_at_home_page(self):
+            """是否在首页"""
+            try:
+                welcome = self.get_welcome_text()
+                return len(welcome) > 0
+            except:
+                return False
+    class MockElement:
+        """模拟元素"""
+        def __init__(self, by, value):
+            self.by = by
+            self.value = value
+            self._text = ""
+            self._displayed = True
+            self._enabled = True
+        @property
+        def text(self):
+            return self._text
+        def click(self):
+            pass
+        def clear(self):
+            self._text = ""
+        def send_keys(self, text):
+            self._text = text
+        def is_displayed(self):
+            return self._displayed
+        def is_enabled(self):
+            return self._enabled
+
+
+def section4():
+    """第四部分：测试用例实现"""
+    print("\n" + "="*60)
+    print("第四部分：测试用例实现")
+    print("="*60)
+    class TestLogin:
+        """
+        登录测试类
+        使用pytest框架
+        """
+        @pytest.fixture
+        def login_page(self):
+            """登录页面对象"""
+            # 实际: driver = DriverFactory.get_driver()
+            driver = MockDriver()
+            return LoginPage(driver)
+        @pytest.fixture
+        def test_data_manager(self):
+            """测试数据管理器"""
+            return TestDataManager()
+        def test_login_success(self, login_page):
+            """测试正常登录"""
+            # 执行登录
+            login_page.login("admin", "123456")
+            # 验证结果
+            assert login_page.is_login_successful(), "登录应该成功"
+        def test_login_wrong_password(self, login_page):
+            """测试错误密码"""
+            login_page.login("admin", "wrong")
+            error_msg = login_page.get_error_message()
+            AssertHelper.assert_text_contains(error_msg, "密码")
+        def test_login_empty_username(self, login_page):
+            """测试空用户名"""
+            login_page.login("", "123456")
+            error_msg = login_page.get_error_message()
+            AssertHelper.assert_in("用户名", error_msg)
+        @pytest.mark.parametrize("username,password,expected_error", [
+            ("admin", "wrong", "密码"),
+            ("", "123456", "用户名"),
+            ("notexist", "123456", "不存在"),
+        ])
+        def test_login_various_failures(self, login_page, username, password, expected_error):
+            """参数化测试各种失败场景"""
+            login_page.login(username, password)
+            error_msg = login_page.get_error_message()
+            AssertHelper.assert_in(expected_error, error_msg)
+    # 模拟Driver
+    class MockDriver:
+        pass
+
+
+def section5():
+    """第五部分：conftest.py配置"""
+    print("\n" + "="*60)
+    print("第五部分：conftest.py配置")
+    print("="*60)
+    CONFTEST_CONTENT = '''
+    # conftest.py
+    import pytest
+    from datetime import datetime
+    from pathlib import Path
+    # 全局fixture
+    @pytest.fixture(scope="session")
+    def config_reader():
+        """配置读取器"""
+        from utils.config_reader import ConfigReader
+        return ConfigReader()
+    @pytest.fixture(scope="session")
+    def driver(config_reader):
+        """WebDriver实例"""
+        from utils.driver_factory import DriverFactory
+        driver = DriverFactory.get_driver()
+        yield driver
+        DriverFactory.quit_driver()
+    @pytest.fixture
+    def test_data_manager():
+        """测试数据管理器"""
+        from utils.test_data_manager import TestDataManager
+        return TestDataManager()
+    # 钩子函数
+    @pytest.hookimpl(tryfirst=True, hookwrapper=True)
+    def pytest_runtest_makereport(item, call):
+        """测试报告钩子"""
+        outcome = yield
+        rep = outcome.get_result()
+        # 失败时截图
+        if rep.when == "call" and rep.failed:
+            driver = item.funcargs.get("driver")
+            if driver:
+                screenshot_dir = Path("screenshots")
+                screenshot_dir.mkdir(exist_ok=True)
+                filename = f"{item.name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+                driver.get_screenshot_as_file(str(screenshot_dir / filename))
+    # 命令行选项
+    def pytest_addoption(parser):
+        parser.addoption(
+            "--env", default="test", help="测试环境: dev/test/prod"
+        )
+        parser.addoption(
+            "--platform", default="android", help="平台: android/ios"
+        )
+    '''
+    print("conftest.py示例:")
+    print(CONFTEST_CONTENT)
+
+
+def section6():
+    """实战任务：完成登录测试"""
+    print("\n" + "="*60)
+    print("实战任务：完成登录测试")
+    print("="*60)
+    """
+    任务：完成完整的登录测试用例
+    要求:
+    1. 使用数据驱动测试
+    2. 使用断言封装
+    3. 失败时自动截图
+    4. 生成测试报告
+    """
+    # 请完成下面的测试用例
+    class MyTestLogin:
+        """
+        完整的登录测试类
+        要求:
+        1. 从JSON文件读取测试数据
+        2. 使用参数化运行所有测试用例
+        3. 使用AssertHelper进行断言
+        4. 添加详细的测试步骤日志
+        """
+        # 你的代码写在这里
+        pass
+
+
+def section7():
+    """参考答案（完成后对照）"""
+    print("\n" + "="*60)
+    print("参考答案（完成后对照）")
+    print("="*60)
+    """
+    class MyTestLogin:
+        @pytest.fixture
+        def login_page(self, driver):
+            return LoginPage(driver)
+        @pytest.fixture
+        def test_data(self, test_data_manager):
+            return test_data_manager.load_json("login_test_data.json")
+        def test_login_from_data(self, login_page, test_data):
+            for case in test_data["test_cases"]:
+                username = case["username"]
+                password = case["password"]
+                expected = case["expected"]
+                login_page.login(username, password)
+                if expected == "success":
+                    AssertHelper.assert_true(
+                        login_page.is_login_successful(),
+                        f"{case['name']}: 登录应该成功"
+                    )
+                else:
+                    error_msg = login_page.get_error_message()
+                    AssertHelper.assert_in(
+                        case.get("expected_message", ""),
+                        error_msg,
+                        f"{case['name']}: 错误信息不匹配"
+                    )
+        @pytest.mark.parametrize("case", [
+            {"username": "admin", "password": "123456", "expected": "success"},
+            {"username": "admin", "password": "wrong", "expected": "fail"},
+            {"username": "", "password": "123456", "expected": "fail"},
+        ])
+        def test_login_parametrized(self, login_page, case):
+            login_page.login(case["username"], case["password"])
+            if case["expected"] == "success":
+                AssertHelper.assert_true(login_page.is_login_successful())
+            else:
+                error_msg = login_page.get_error_message()
+                AssertHelper.assert_is_not_none(error_msg)
+    """
+
+
+def section8():
+    """今日学习要点总结"""
+    print("\n" + "="*60)
+    print("今日学习要点总结")
+    print("="*60)
+    """
+    1. 测试数据管理:
+       - 分离测试数据和代码
+       - 支持JSON/YAML/CSV
+       - 数据驱动测试
+    2. 断言封装:
+       - 统一断言接口
+       - 友好的错误信息
+       - 支持元素断言
+    3. 页面对象:
+       - 完整封装页面操作
+       - 返回页面对象支持链式调用
+       - 提供验证方法
+    4. 测试用例:
+       - 使用pytest fixture
+       - 参数化测试
+       - 失败自动截图
+    5. conftest.py:
+       - 共享fixture
+       - 钩子函数
+       - 命令行选项
+    验证标准：能跑通一个完整的登录测试用例
+    """
+
+def practice_task():
+    """实战任务"""
+    print("\n" + "="*60)
+    print("实战任务")
+    print("="*60)
+    print("请修改代码完成任务...")
+
+
+def show_answer():
+    """显示参考答案"""
+    print("\n" + "="*60)
+    print("参考答案")
+    print("="*60)
+    print("请参考原文件中的答案部分")
+
+
+def show_summary():
+    """显示学习总结"""
+    print("\n" + "="*60)
+    print("学习总结")
+    print("="*60)
+    print("请参考原文件中的总结部分")
+
+def main():
+    """主菜单"""
+    while True:
+        print("\n" + "="*60)
+        print("Day {day_num}: 学习菜单")
+        print("="*60)
+        print("1. 第一部分：测试数据管理")
+        print("2. 第二部分：断言封装")
+        print("3. 第三部分：页面对象实现")
+        print("4. 第四部分：测试用例实现")
+        print("5. 第五部分：conftest.py配置")
+        print("6. 实战任务：完成登录测试")
+        print("7. 参考答案（完成后对照）")
+        print("8. 今日学习要点总结")
+        print("9. 实战任务")
+        print("8. 参考答案")
+        print("7. 学习总结")
+        print("0. 退出")
+        print("="*60)
+        
+        choice = input("\n请选择 (0-9): ").strip()
+        
+        if choice == "1":
+            section1()
+        if choice == "2":
+            section2()
+        if choice == "3":
+            section3()
+        if choice == "4":
+            section4()
+        if choice == "5":
+            section5()
+        if choice == "6":
+            section6()
+        if choice == "7":
+            section7()
+        if choice == "8":
+            section8()
+        elif choice == "9":
+            practice_task()
+        elif choice == "8":
+            show_answer()
+        elif choice == "7":
+            show_summary()
+        elif choice == "0":
+            print("\n感谢学习！再见！")
+            break
+        else:
+            print("\n无效选择，请重新输入")
+        
+        input("\n按回车键继续...")
+
+
+if __name__ == "__main__":
+    main()

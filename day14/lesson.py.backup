@@ -1,0 +1,624 @@
+# -*- coding: utf-8 -*-
+"""
+Day 14: Day 14
+"""
+
+
+def section1():
+    """第一部分：POM简介"""
+    print("\n" + "="*60)
+    print("第一部分：POM简介")
+    print("="*60)
+    """
+    POM (Page Object Model) 页面对象模式
+    为什么使用POM？
+    1. 代码复用 - 页面元素定位集中管理
+    2. 维护方便 - 页面变化只需修改一处
+    3. 可读性高 - 测试代码像自然语言
+    4. 降低耦合 - 页面操作与测试逻辑分离
+    POM结构:
+    ├── pages/              # 页面对象
+    │   ├── base_page.py    # 基础页面类
+    │   ├── login_page.py   # 登录页面
+    │   └── home_page.py    # 首页
+    ├── tests/              # 测试用例
+    │   └── test_login.py
+    └── conftest.py         # 共享fixture
+    """
+
+
+def section2():
+    """第二部分：基础页面类 (BasePage)"""
+    print("\n" + "="*60)
+    print("第二部分：基础页面类 (BasePage)")
+    print("="*60)
+    class BasePage:
+        """
+        基础页面类
+        所有页面对象都继承此类
+        """
+        def __init__(self, driver):
+            self.driver = driver
+            self.timeout = 10
+        # ==================== 元素查找 ====================
+        def find_element(self, locator):
+            """
+            查找单个元素
+            locator格式: ("id", "value") 或 ("xpath", "//...")
+            """
+            by, value = locator
+            print(f"[BasePage] 查找元素: {by}={value}")
+            # 实际代码: return self.driver.find_element(by, value)
+            return MockElement(by, value)
+        def find_elements(self, locator):
+            """查找多个元素"""
+            by, value = locator
+            print(f"[BasePage] 查找多个元素: {by}={value}")
+            return [MockElement(by, value)]
+        def wait_for_element(self, locator, timeout=None):
+            """显式等待元素"""
+            timeout = timeout or self.timeout
+            by, value = locator
+            print(f"[BasePage] 等待元素: {by}={value}, 超时:{timeout}s")
+            return MockElement(by, value)
+        def is_element_present(self, locator):
+            """判断元素是否存在"""
+            try:
+                self.find_element(locator)
+                return True
+            except:
+                return False
+        # ==================== 元素操作 ====================
+        def click(self, locator):
+            """点击元素"""
+            element = self.find_element(locator)
+            print(f"[BasePage] 点击元素")
+            element.click()
+        def send_keys(self, locator, text):
+            """输入文本"""
+            element = self.find_element(locator)
+            print(f"[BasePage] 输入: {text}")
+            element.clear()
+            element.send_keys(text)
+        def get_text(self, locator):
+            """获取元素文本"""
+            element = self.find_element(locator)
+            text = element.text
+            print(f"[BasePage] 获取文本: {text}")
+            return text
+        def get_attribute(self, locator, attribute):
+            """获取元素属性"""
+            element = self.find_element(locator)
+            return element.get_attribute(attribute)
+        # ==================== 手势操作 ====================
+        def swipe_up(self, duration=None):
+            """向上滑动"""
+            print("[BasePage] 向上滑动")
+        def swipe_down(self, duration=None):
+            """向下滑动"""
+            print("[BasePage] 向下滑动")
+        def swipe_left(self, duration=None):
+            """向左滑动"""
+            print("[BasePage] 向左滑动")
+        def swipe_right(self, duration=None):
+            """向右滑动"""
+            print("[BasePage] 向右滑动")
+        def long_press(self, locator, duration=1000):
+            """长按"""
+            element = self.find_element(locator)
+            print(f"[BasePage] 长按元素 {duration}ms")
+        # ==================== 等待 ====================
+        def wait(self, seconds):
+            """固定等待"""
+            import time
+            time.sleep(seconds)
+        def implicitly_wait(self, seconds):
+            """隐式等待"""
+            self.driver.implicitly_wait(seconds)
+    # 模拟元素
+    class MockElement:
+        def __init__(self, by, value):
+            self.by = by
+            self.value = value
+            self._text = f"Text({value})"
+        @property
+        def text(self):
+            return self._text
+        def click(self):
+            pass
+        def clear(self):
+            pass
+        def send_keys(self, text):
+            self._text = text
+        def get_attribute(self, name):
+            return ""
+
+
+def section3():
+    """第三部分：具体页面对象"""
+    print("\n" + "="*60)
+    print("第三部分：具体页面对象")
+    print("="*60)
+    class LoginPage(BasePage):
+        """
+        登录页面
+        封装登录相关的元素和操作
+        """
+        # 元素定位器 - 集中管理
+        USERNAME_INPUT = ("id", "com.example:id/username")
+        PASSWORD_INPUT = ("id", "com.example:id/password")
+        LOGIN_BUTTON = ("id", "com.example:id/login_button")
+        ERROR_MESSAGE = ("id", "com.example:id/error_message")
+        REMEMBER_ME = ("id", "com.example:id/remember_me")
+        FORGOT_PASSWORD = ("id", "com.example:id/forgot_password")
+        # ==================== 页面操作 ====================
+        def input_username(self, username):
+            """输入用户名"""
+            self.send_keys(self.USERNAME_INPUT, username)
+            return self  # 支持链式调用
+        def input_password(self, password):
+            """输入密码"""
+            self.send_keys(self.PASSWORD_INPUT, password)
+            return self
+        def click_login(self):
+            """点击登录按钮"""
+            self.click(self.LOGIN_BUTTON)
+            return self
+        def click_remember_me(self):
+            """点击记住我"""
+            self.click(self.REMEMBER_ME)
+            return self
+        def click_forgot_password(self):
+            """点击忘记密码"""
+            self.click(self.FORGOT_PASSWORD)
+            # 返回新页面
+            return ForgotPasswordPage(self.driver)
+        # ==================== 业务流程 ====================
+        def login(self, username, password):
+            """
+            完整的登录流程
+            支持链式调用: login_page.login("user", "pass")
+            """
+            self.input_username(username)
+            self.input_password(password)
+            self.click_login()
+            return HomePage(self.driver)  # 登录成功后跳转到首页
+        def login_with_remember(self, username, password):
+            """带记住我的登录"""
+            self.input_username(username)
+            self.input_password(password)
+            self.click_remember_me()
+            self.click_login()
+            return HomePage(self.driver)
+        # ==================== 验证方法 ====================
+        def get_error_message(self):
+            """获取错误提示"""
+            return self.get_text(self.ERROR_MESSAGE)
+        def is_login_button_enabled(self):
+            """登录按钮是否可用"""
+            return self.get_attribute(self.LOGIN_BUTTON, "enabled") == "true"
+        def is_error_displayed(self):
+            """错误信息是否显示"""
+            return self.is_element_present(self.ERROR_MESSAGE)
+    class HomePage(BasePage):
+        """首页"""
+        # 元素定位器
+        WELCOME_MESSAGE = ("id", "com.example:id/welcome_message")
+        USERNAME_DISPLAY = ("id", "com.example:id/username_display")
+        LOGOUT_BUTTON = ("id", "com.example:id/logout_button")
+        MENU_BUTTON = ("id", "com.example:id/menu_button")
+        # ==================== 页面操作 ====================
+        def click_logout(self):
+            """点击退出"""
+            self.click(self.LOGOUT_BUTTON)
+            return LoginPage(self.driver)
+        def click_menu(self):
+            """点击菜单"""
+            self.click(self.MENU_BUTTON)
+            return MenuPage(self.driver)
+        # ==================== 验证方法 ====================
+        def get_welcome_text(self):
+            """获取欢迎文本"""
+            return self.get_text(self.WELCOME_MESSAGE)
+        def get_displayed_username(self):
+            """获取显示的用户名"""
+            return self.get_text(self.USERNAME_DISPLAY)
+        def is_logged_in(self):
+            """是否已登录"""
+            return self.is_element_present(self.WELCOME_MESSAGE)
+    class ForgotPasswordPage(BasePage):
+        """忘记密码页"""
+        EMAIL_INPUT = ("id", "com.example:id/email_input")
+        SUBMIT_BUTTON = ("id", "com.example:id/submit_button")
+        BACK_BUTTON = ("id", "com.example:id/back_button")
+        def input_email(self, email):
+            """输入邮箱"""
+            self.send_keys(self.EMAIL_INPUT, email)
+            return self
+        def click_submit(self):
+            """点击提交"""
+            self.click(self.SUBMIT_BUTTON)
+            return self
+        def click_back(self):
+            """点击返回"""
+            self.click(self.BACK_BUTTON)
+            return LoginPage(self.driver)
+        def reset_password(self, email):
+            """重置密码流程"""
+            self.input_email(email)
+            self.click_submit()
+            return self
+    class MenuPage(BasePage):
+        """菜单页"""
+        PROFILE_OPTION = ("id", "com.example:id/menu_profile")
+        SETTINGS_OPTION = ("id", "com.example:id/menu_settings")
+        HELP_OPTION = ("id", "com.example:id/menu_help")
+        def click_profile(self):
+            """点击个人资料"""
+            self.click(self.PROFILE_OPTION)
+            return ProfilePage(self.driver)
+        def click_settings(self):
+            """点击设置"""
+            self.click(self.SETTINGS_OPTION)
+            return SettingsPage(self.driver)
+    class ProfilePage(BasePage):
+        """个人资料页"""
+        pass
+    class SettingsPage(BasePage):
+        """设置页"""
+        pass
+
+
+def section4():
+    """第四部分：POM使用示例"""
+    print("\n" + "="*60)
+    print("第四部分：POM使用示例")
+    print("="*60)
+    def demo_pom():
+        """演示POM使用"""
+        print("\n" + "="*60)
+        print("POM使用示例")
+        print("="*60)
+        # 模拟driver
+        class MockDriver:
+            def implicitly_wait(self, seconds):
+                pass
+        driver = MockDriver()
+        # 1. 传统写法 vs POM写法
+        print("\n1. 传统写法:")
+        print("  driver.find_element('id', 'username').send_keys('admin')")
+        print("  driver.find_element('id', 'password').send_keys('123')")
+        print("  driver.find_element('id', 'login_btn').click()")
+        print("\n2. POM写法:")
+        login_page = LoginPage(driver)
+        login_page.login("admin", "123")
+        print("  一行代码完成登录！")
+        # 2. 链式调用
+        print("\n3. 链式调用:")
+        print("  login_page.input_username('admin').input_password('123').click_login()")
+        # 3. 页面流转
+        print("\n4. 页面流转:")
+        print("  home_page = login_page.login('admin', '123')")
+        print("  login_page = home_page.click_logout()")
+        # 4. 验证方法
+        print("\n5. 验证方法:")
+        print("  error = login_page.get_error_message()")
+        print("  assert '错误' in error")
+
+
+def section5():
+    """第五部分：POM最佳实践"""
+    print("\n" + "="*60)
+    print("第五部分：POM最佳实践")
+    print("="*60)
+    BEST_PRACTICES = """
+    POM最佳实践:
+    1. 命名规范
+       - 页面类名: XxxPage (如 LoginPage)
+       - 元素定位器: 大写下划线 (如 USERNAME_INPUT)
+       - 操作方法: 动词开头 (如 click_login)
+       - 验证方法: is_xxx 或 get_xxx
+    2. 元素定位
+       - 集中管理在页面类顶部
+       - 使用元组格式: ("id", "value")
+       - 避免在测试用例中直接写定位器
+    3. 操作方法
+       - 每个操作一个方法
+       - 返回self支持链式调用
+       - 页面跳转返回新页面对象
+    4. 错误处理
+       - 在页面类中封装等待逻辑
+       - 提供元素存在性检查方法
+       - 封装常用验证方法
+    5. 代码复用
+       - 公共方法放在BasePage
+       - 使用继承复用页面结构
+       - 封装通用业务流程
+    6. 测试用例
+       - 只包含测试逻辑
+       - 不包含元素定位
+       - 读起来像自然语言
+    """
+    print(BEST_PRACTICES)
+
+
+def section6():
+    """实战任务：实现POM框架"""
+    print("\n" + "="*60)
+    print("实战任务：实现POM框架")
+    print("="*60)
+    """
+    任务：为电商应用实现POM框架
+    应用功能:
+    - 商品列表页
+    - 商品详情页
+    - 购物车页
+    - 结算页
+    """
+    # 请完成下面的页面类
+    class ProductListPage(BasePage):
+        """
+        商品列表页
+        需要实现:
+        1. 定义元素定位器 (搜索框、商品列表、筛选按钮等)
+        2. 实现搜索商品方法
+        3. 实现点击商品进入详情页方法
+        4. 实现筛选商品方法
+        """
+        # 元素定位器
+        # SEARCH_INPUT = ...
+        # PRODUCT_LIST = ...
+        def search_product(self, keyword):
+            """搜索商品"""
+            # 你的代码
+            pass
+        def click_product(self, index=0):
+            """点击商品进入详情页"""
+            # 你的代码
+            pass
+        def filter_by_category(self, category):
+            """按分类筛选"""
+            # 你的代码
+            pass
+    class ProductDetailPage(BasePage):
+        """
+        商品详情页
+        需要实现:
+        1. 定义元素定位器 (商品名称、价格、加入购物车按钮等)
+        2. 实现获取商品信息方法
+        3. 实现加入购物车方法
+        4. 实现选择规格方法
+        """
+        def get_product_info(self):
+            """获取商品信息"""
+            # 你的代码
+            pass
+        def add_to_cart(self, quantity=1):
+            """加入购物车"""
+            # 你的代码
+            pass
+        def select_spec(self, spec_name):
+            """选择规格"""
+            # 你的代码
+            pass
+    class CartPage(BasePage):
+        """
+        购物车页
+        需要实现:
+        1. 定义元素定位器 (商品列表、数量输入框、删除按钮、结算按钮等)
+        2. 实现获取购物车商品列表方法
+        3. 实现修改商品数量方法
+        4. 实现删除商品方法
+        5. 实现点击结算方法
+        """
+        def get_cart_items(self):
+            """获取购物车商品列表"""
+            # 你的代码
+            pass
+        def update_quantity(self, product_name, quantity):
+            """修改商品数量"""
+            # 你的代码
+            pass
+        def remove_item(self, product_name):
+            """删除商品"""
+            # 你的代码
+            pass
+        def click_checkout(self):
+            """点击结算"""
+            # 你的代码
+            pass
+        def get_total_price(self):
+            """获取总价"""
+            # 你的代码
+            pass
+
+
+def section7():
+    """参考答案（完成后对照）"""
+    print("\n" + "="*60)
+    print("参考答案（完成后对照）")
+    print("="*60)
+    """
+    class ProductListPage(BasePage):
+        SEARCH_INPUT = ("id", "com.shop:id/search_input")
+        SEARCH_BUTTON = ("id", "com.shop:id/search_button")
+        PRODUCT_ITEMS = ("id", "com.shop:id/product_item")
+        PRODUCT_NAME = ("id", "com.shop:id/product_name")
+        FILTER_BUTTON = ("id", "com.shop:id/filter_button")
+        def search_product(self, keyword):
+            self.send_keys(self.SEARCH_INPUT, keyword)
+            self.click(self.SEARCH_BUTTON)
+            return self
+        def click_product(self, index=0):
+            products = self.find_elements(self.PRODUCT_ITEMS)
+            if index < len(products):
+                products[index].click()
+            return ProductDetailPage(self.driver)
+        def filter_by_category(self, category):
+            self.click(self.FILTER_BUTTON)
+            # 选择分类...
+            return self
+    class ProductDetailPage(BasePage):
+        PRODUCT_NAME = ("id", "com.shop:id/product_name")
+        PRODUCT_PRICE = ("id", "com.shop:id/product_price")
+        ADD_TO_CART_BUTTON = ("id", "com.shop:id/add_to_cart")
+        QUANTITY_INPUT = ("id", "com.shop:id/quantity_input")
+        SPEC_OPTIONS = ("id", "com.shop:id/spec_option")
+        def get_product_info(self):
+            return {
+                "name": self.get_text(self.PRODUCT_NAME),
+                "price": self.get_text(self.PRODUCT_PRICE)
+            }
+        def select_spec(self, spec_name):
+            specs = self.find_elements(self.SPEC_OPTIONS)
+            for spec in specs:
+                if spec.text == spec_name:
+                    spec.click()
+                    break
+            return self
+        def add_to_cart(self, quantity=1):
+            self.send_keys(self.QUANTITY_INPUT, str(quantity))
+            self.click(self.ADD_TO_CART_BUTTON)
+            return self
+    class CartPage(BasePage):
+        CART_ITEMS = ("id", "com.shop:id/cart_item")
+        ITEM_NAME = ("id", "com.shop:id/item_name")
+        ITEM_QUANTITY = ("id", "com.shop:id/item_quantity")
+        ITEM_PRICE = ("id", "com.shop:id/item_price")
+        REMOVE_BUTTON = ("id", "com.shop:id/remove_button")
+        CHECKOUT_BUTTON = ("id", "com.shop:id/checkout_button")
+        TOTAL_PRICE = ("id", "com.shop:id/total_price")
+        def get_cart_items(self):
+            items = []
+            elements = self.find_elements(self.CART_ITEMS)
+            for elem in elements:
+                items.append({
+                    "name": elem.find_element(*self.ITEM_NAME).text,
+                    "quantity": elem.find_element(*self.ITEM_QUANTITY).text,
+                    "price": elem.find_element(*self.ITEM_PRICE).text
+                })
+            return items
+        def remove_item(self, product_name):
+            items = self.find_elements(self.CART_ITEMS)
+            for item in items:
+                name = item.find_element(*self.ITEM_NAME).text
+                if name == product_name:
+                    item.find_element(*self.REMOVE_BUTTON).click()
+                    break
+            return self
+        def click_checkout(self):
+            self.click(self.CHECKOUT_BUTTON)
+            return CheckoutPage(self.driver)
+        def get_total_price(self):
+            return self.get_text(self.TOTAL_PRICE)
+    """
+
+
+def section8():
+    """今日学习要点总结"""
+    print("\n" + "="*60)
+    print("今日学习要点总结")
+    print("="*60)
+    """
+    1. POM概念:
+       - 页面对象模式
+       - 分离页面操作和测试逻辑
+       - 提高代码可维护性
+    2. BasePage:
+       - 封装通用方法
+       - 元素查找、操作、手势
+       - 所有页面类继承BasePage
+    3. 页面对象:
+       - 集中管理元素定位器
+       - 封装页面操作方法
+       - 返回页面对象支持链式调用
+       - 提供验证方法
+    4. 最佳实践:
+       - 命名规范
+       - 元素定位集中管理
+       - 支持链式调用
+       - 页面流转返回新页面对象
+    验证标准：能用POM重构之前的测试代码
+    """
+    # 运行演示
+    if __name__ == "__main__":
+        demo_pom()
+
+def practice_task():
+    """实战任务"""
+    print("\n" + "="*60)
+    print("实战任务")
+    print("="*60)
+    print("请修改代码完成任务...")
+
+
+def show_answer():
+    """显示参考答案"""
+    print("\n" + "="*60)
+    print("参考答案")
+    print("="*60)
+    print("请参考原文件中的答案部分")
+
+
+def show_summary():
+    """显示学习总结"""
+    print("\n" + "="*60)
+    print("学习总结")
+    print("="*60)
+    print("请参考原文件中的总结部分")
+
+def main():
+    """主菜单"""
+    while True:
+        print("\n" + "="*60)
+        print("Day {day_num}: 学习菜单")
+        print("="*60)
+        print("1. 第一部分：POM简介")
+        print("2. 第二部分：基础页面类 (BasePage)")
+        print("3. 第三部分：具体页面对象")
+        print("4. 第四部分：POM使用示例")
+        print("5. 第五部分：POM最佳实践")
+        print("6. 实战任务：实现POM框架")
+        print("7. 参考答案（完成后对照）")
+        print("8. 今日学习要点总结")
+        print("9. 实战任务")
+        print("8. 参考答案")
+        print("7. 学习总结")
+        print("0. 退出")
+        print("="*60)
+        
+        choice = input("\n请选择 (0-9): ").strip()
+        
+        if choice == "1":
+            section1()
+        if choice == "2":
+            section2()
+        if choice == "3":
+            section3()
+        if choice == "4":
+            section4()
+        if choice == "5":
+            section5()
+        if choice == "6":
+            section6()
+        if choice == "7":
+            section7()
+        if choice == "8":
+            section8()
+        elif choice == "9":
+            practice_task()
+        elif choice == "8":
+            show_answer()
+        elif choice == "7":
+            show_summary()
+        elif choice == "0":
+            print("\n感谢学习！再见！")
+            break
+        else:
+            print("\n无效选择，请重新输入")
+        
+        input("\n按回车键继续...")
+
+
+if __name__ == "__main__":
+    main()

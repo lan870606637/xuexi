@@ -1,0 +1,390 @@
+# -*- coding: utf-8 -*-
+"""
+Day 6: Day 6
+"""
+
+
+def section1():
+    """第一部分：文件读写基础"""
+    print("\n" + "="*60)
+    print("第一部分：文件读写基础")
+    print("="*60)
+    import os
+    # 创建测试目录
+    test_dir = "day06_test_files"
+    os.makedirs(test_dir, exist_ok=True)
+    # 1. 写入文件
+    print("写入文件:")
+    file_path = os.path.join(test_dir, "test.txt")
+    # 方式1：基本写法
+    f = open(file_path, "w", encoding="utf-8")  # w=写入模式
+    f.write("第一行\n")
+    f.write("第二行\n")
+    f.close()  # 必须关闭！
+    # 方式2：with语句 (推荐！自动关闭)
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write("重新写入第一行\n")
+        f.write("重新写入第二行\n")
+    print(f"文件已写入: {file_path}")
+    # 2. 读取文件
+    print("\n读取文件:")
+    # 方式1：read() - 读取全部
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+        print(f"read():\n{content}")
+    # 方式2：readline() - 逐行读取
+    with open(file_path, "r", encoding="utf-8") as f:
+        print("readline():")
+        line1 = f.readline()
+        line2 = f.readline()
+        print(f"  第1行: {line1.strip()}")
+        print(f"  第2行: {line2.strip()}")
+    # 方式3：readlines() - 读取为列表
+    with open(file_path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+        print(f"readlines(): {lines}")
+    # 方式4：直接遍历 (推荐用于大文件)
+    with open(file_path, "r", encoding="utf-8") as f:
+        print("遍历文件:")
+        for i, line in enumerate(f, 1):
+            print(f"  第{i}行: {line.strip()}")
+    # 3. 追加模式
+    print("\n追加模式:")
+    with open(file_path, "a", encoding="utf-8") as f:  # a=追加模式
+        f.write("追加的第三行\n")
+    with open(file_path, "r", encoding="utf-8") as f:
+        print(f"追加后内容:\n{f.read()}")
+
+
+def section2():
+    """第二部分：文件路径操作"""
+    print("\n" + "="*60)
+    print("第二部分：文件路径操作")
+    print("="*60)
+    print("\n" + "="*60)
+    print("文件路径操作 (os.path和pathlib)")
+    print("="*60)
+    import os
+    from pathlib import Path
+    # 获取当前工作目录
+    print(f"当前目录: {os.getcwd()}")
+    # 拼接路径
+    config_path = os.path.join("config", "test.json")
+    print(f"拼接路径: {config_path}")
+    # 获取绝对路径
+    abs_path = os.path.abspath(file_path)
+    print(f"绝对路径: {abs_path}")
+    # 获取目录名和文件名
+    dirname = os.path.dirname(abs_path)
+    basename = os.path.basename(abs_path)
+    print(f"目录: {dirname}")
+    print(f"文件名: {basename}")
+    # 分离文件名和扩展名
+    name, ext = os.path.splitext(basename)
+    print(f"文件名: {name}, 扩展名: {ext}")
+    # 检查文件/目录是否存在
+    print(f"\n文件存在? {os.path.exists(file_path)}")
+    print(f"是文件? {os.path.isfile(file_path)}")
+    print(f"是目录? {os.path.isdir(test_dir)}")
+    # pathlib (更现代的写法)
+    print("\n使用pathlib:")
+    p = Path(file_path)
+    print(f"Path对象: {p}")
+    print(f"父目录: {p.parent}")
+    print(f"文件名: {p.name}")
+    print(f"扩展名: {p.suffix}")
+    print(f"存在? {p.exists()}")
+
+
+def section3():
+    """第三部分：JSON处理"""
+    print("\n" + "="*60)
+    print("第三部分：JSON处理")
+    print("="*60)
+    print("\n" + "="*60)
+    print("JSON处理")
+    print("="*60)
+    import json
+    # 1. Python对象转JSON字符串
+    test_config = {
+        "platform": "Android",
+        "version": 12,
+        "device": "emulator-5554",
+        "capabilities": {
+            "automationName": "UiAutomator2",
+            "noReset": True
+        },
+        "test_cases": ["login", "register", "search"]
+    }
+    # json.dumps: Python对象 -> JSON字符串
+    json_str = json.dumps(test_config)
+    print(f"JSON字符串:\n{json_str}")
+    # 美化输出 (indent缩进)
+    json_pretty = json.dumps(test_config, indent=2, ensure_ascii=False)
+    print(f"\n美化输出:\n{json_pretty}")
+    # 2. JSON字符串转Python对象
+    # json.loads: JSON字符串 -> Python对象
+    parsed = json.loads(json_str)
+    print(f"\n解析后的类型: {type(parsed)}")
+    print(f"平台: {parsed['platform']}")
+    # 3. 写入JSON文件
+    json_file = os.path.join(test_dir, "config.json")
+    with open(json_file, "w", encoding="utf-8") as f:
+        json.dump(test_config, f, indent=2, ensure_ascii=False)
+    print(f"\nJSON已保存: {json_file}")
+    # 4. 读取JSON文件
+    with open(json_file, "r", encoding="utf-8") as f:
+        loaded_config = json.load(f)
+    print(f"读取的配置: {loaded_config}")
+
+
+def section4():
+    """第四部分：YAML处理"""
+    print("\n" + "="*60)
+    print("第四部分：YAML处理")
+    print("="*60)
+    print("\n" + "="*60)
+    print("YAML处理 (需要安装: pip install pyyaml)")
+    print("="*60)
+    try:
+        import yaml
+        has_yaml = True
+    except ImportError:
+        print("提示: 请先安装PyYAML: pip install pyyaml")
+        has_yaml = False
+    if has_yaml:
+        # YAML内容 (字符串)
+        yaml_content = """
+    # 测试配置
+    platform: Android
+    version: 12
+    devices:
+      - emulator-5554
+      - emulator-5556
+    capabilities:
+      automationName: UiAutomator2
+      noReset: true
+      newCommandTimeout: 300
+        """
+        # YAML字符串 -> Python对象
+        yaml_data = yaml.safe_load(yaml_content)
+        print(f"解析的YAML:\n{yaml_data}")
+        print(f"设备列表: {yaml_data['devices']}")
+        # Python对象 -> YAML字符串
+        yaml_output = yaml.dump(yaml_data, default_flow_style=False, allow_unicode=True)
+        print(f"\n转回YAML:\n{yaml_output}")
+        # 写入YAML文件
+        yaml_file = os.path.join(test_dir, "config.yaml")
+        with open(yaml_file, "w", encoding="utf-8") as f:
+            yaml.dump(yaml_data, f, default_flow_style=False, allow_unicode=True)
+        print(f"\nYAML已保存: {yaml_file}")
+        # 读取YAML文件
+        with open(yaml_file, "r", encoding="utf-8") as f:
+            loaded_yaml = yaml.safe_load(f)
+        print(f"读取的YAML: {loaded_yaml}")
+
+
+def section5():
+    """第五部分：CSV处理 (测试数据常用)"""
+    print("\n" + "="*60)
+    print("第五部分：CSV处理 (测试数据常用)")
+    print("="*60)
+    print("\n" + "="*60)
+    print("CSV处理")
+    print("="*60)
+    import csv
+    csv_file = os.path.join(test_dir, "test_data.csv")
+    # 写入CSV
+    print("写入CSV:")
+    test_data = [
+        ["username", "password", "expected"],
+        ["admin", "123456", "success"],
+        ["user", "wrong", "fail"],
+        ["", "123456", "fail"],
+    ]
+    with open(csv_file, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerows(test_data)
+    print(f"CSV已保存: {csv_file}")
+    # 读取CSV
+    print("\n读取CSV:")
+    with open(csv_file, "r", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        for row in reader:
+            print(f"  {row}")
+    # 使用DictReader (更方便)
+    print("\n使用DictReader:")
+    with open(csv_file, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            print(f"  {dict(row)}")
+
+
+def section6():
+    """实战任务：读取测试配置"""
+    print("\n" + "="*60)
+    print("实战任务：读取测试配置")
+    print("="*60)
+    print("\n" + "="*60)
+    print("实战任务：读取测试配置")
+    print("="*60)
+    def load_config(file_path):
+        """
+        读取配置文件，支持JSON和YAML格式
+        参数:
+            file_path: 配置文件路径
+        返回:
+            配置字典
+        异常:
+            文件不存在或格式错误时抛出异常
+        """
+        # 你的代码写在这里：
+        # 提示：
+        # 1. 检查文件是否存在
+        # 2. 根据文件扩展名(.json或.yaml/.yml)选择解析方式
+        # 3. 使用相应的库解析文件
+        # 4. 返回解析后的字典
+        pass  # 删除这行，写上你的代码
+    # 测试代码 (取消注释测试)
+    """
+    print("\n测试load_config:")
+    # 测试JSON
+    json_config = load_config(json_file)
+    print(f"JSON配置: {json_config}")
+    # 测试YAML (如果安装了pyyaml)
+    if has_yaml:
+        yaml_config = load_config(yaml_file)
+        print(f"YAML配置: {yaml_config}")
+    """
+
+
+def section7():
+    """参考答案（完成后对照）"""
+    print("\n" + "="*60)
+    print("参考答案（完成后对照）")
+    print("="*60)
+    """
+    def load_config(file_path):
+        import os
+        import json
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"配置文件不存在: {file_path}")
+        # 获取文件扩展名
+        _, ext = os.path.splitext(file_path)
+        ext = ext.lower()
+        with open(file_path, "r", encoding="utf-8") as f:
+            if ext == ".json":
+                return json.load(f)
+            elif ext in [".yaml", ".yml"]:
+                import yaml
+                return yaml.safe_load(f)
+            else:
+                raise ValueError(f"不支持的配置文件格式: {ext}")
+    """
+
+
+def section8():
+    """今日学习要点总结"""
+    print("\n" + "="*60)
+    print("今日学习要点总结")
+    print("="*60)
+    """
+    1. 文件读写：
+       - with语句 (推荐，自动关闭)
+       - 模式: r(读), w(写), a(追加)
+       - 编码: 始终指定utf-8
+    2. 路径操作：
+       - os.path.join() 拼接路径
+       - os.path.exists() 检查存在
+       - pathlib.Path (现代写法)
+    3. JSON处理：
+       - json.dumps() / json.loads() - 字符串
+       - json.dump() / json.load() - 文件
+       - indent参数美化输出
+    4. YAML处理：
+       - pip install pyyaml
+       - yaml.safe_load() / yaml.dump()
+    5. CSV处理：
+       - csv.writer() / csv.reader()
+       - csv.DictReader() (推荐)
+    验证标准：能从配置文件读取测试环境配置
+    """
+
+def practice_task():
+    """实战任务"""
+    print("\n" + "="*60)
+    print("实战任务")
+    print("="*60)
+    print("请修改代码完成任务...")
+
+
+def show_answer():
+    """显示参考答案"""
+    print("\n" + "="*60)
+    print("参考答案")
+    print("="*60)
+    print("请参考原文件中的答案部分")
+
+
+def show_summary():
+    """显示学习总结"""
+    print("\n" + "="*60)
+    print("学习总结")
+    print("="*60)
+    print("请参考原文件中的总结部分")
+
+def main():
+    """主菜单"""
+    while True:
+        print("\n" + "="*60)
+        print("Day {day_num}: 学习菜单")
+        print("="*60)
+        print("1. 第一部分：文件读写基础")
+        print("2. 第二部分：文件路径操作")
+        print("3. 第三部分：JSON处理")
+        print("4. 第四部分：YAML处理")
+        print("5. 第五部分：CSV处理 (测试数据常用)")
+        print("6. 实战任务：读取测试配置")
+        print("7. 参考答案（完成后对照）")
+        print("8. 今日学习要点总结")
+        print("9. 实战任务")
+        print("8. 参考答案")
+        print("7. 学习总结")
+        print("0. 退出")
+        print("="*60)
+        
+        choice = input("\n请选择 (0-9): ").strip()
+        
+        if choice == "1":
+            section1()
+        if choice == "2":
+            section2()
+        if choice == "3":
+            section3()
+        if choice == "4":
+            section4()
+        if choice == "5":
+            section5()
+        if choice == "6":
+            section6()
+        if choice == "7":
+            section7()
+        if choice == "8":
+            section8()
+        elif choice == "9":
+            practice_task()
+        elif choice == "8":
+            show_answer()
+        elif choice == "7":
+            show_summary()
+        elif choice == "0":
+            print("\n感谢学习！再见！")
+            break
+        else:
+            print("\n无效选择，请重新输入")
+        
+        input("\n按回车键继续...")
+
+
+if __name__ == "__main__":
+    main()

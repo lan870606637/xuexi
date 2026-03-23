@@ -1,0 +1,987 @@
+# -*- coding: utf-8 -*-
+"""
+Day 20: Day 20
+"""
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section1():
+    """第一部分：FPS监控"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第一部分：FPS监控")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    """
+    FPS (Frames Per Second) 帧率
+    - 60 FPS: 流畅
+    - 30-60 FPS: 可接受
+    - <30 FPS: 卡顿
+    监控命令:
+    adb shell dumpsys gfxinfo <package_name>
+    """
+    # 【类定义】
+    # 语法: class 类名:
+    # 作用: 创建对象模板，封装数据和方法
+    class FPSMonitor:
+        """FPS监控器"""
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def __init__():
+            self.adb = adb_helper
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def get_fps_info():
+            """
+            获取FPS信息
+            参数:
+                package_name: 应用包名
+            返回:
+                FPS信息字典
+            """
+            output = self.adb._run_shell(f"dumpsys gfxinfo {package_name}")
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return self._parse_gfxinfo(output)
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def _parse_gfxinfo():
+            """解析gfxinfo输出"""
+            fps_info = {
+                "timestamp": datetime.now().isoformat(),
+                "total_frames": 0,
+                "janky_frames": 0,
+                "janky_percent": 0.0,
+                "fps": 0,
+                "percentile_50": 0,
+                "percentile_90": 0,
+                "percentile_95": 0,
+                "percentile_99": 0,
+            }
+            # 解析总帧数
+            frames_match = re.search(r'Total frames rendered:\s+(\d+)', output)
+            if frames_match:
+                fps_info["total_frames"] = int(frames_match.group(1))
+            # 解析卡顿帧数
+            janky_match = re.search(r'Janky frames:\s+(\d+)\s+\(([\d.]+)%\)', output)
+            if janky_match:
+                fps_info["janky_frames"] = int(janky_match.group(1))
+                fps_info["janky_percent"] = float(janky_match.group(2))
+            # 解析百分位
+            p50_match = re.search(r'50th percentile:\s+(\d+)ms', output)
+            if p50_match:
+                fps_info["percentile_50"] = int(p50_match.group(1))
+            p90_match = re.search(r'90th percentile:\s+(\d+)ms', output)
+            if p90_match:
+                fps_info["percentile_90"] = int(p90_match.group(1))
+            p95_match = re.search(r'95th percentile:\s+(\d+)ms', output)
+            if p95_match:
+                fps_info["percentile_95"] = int(p95_match.group(1))
+            p99_match = re.search(r'99th percentile:\s+(\d+)ms', output)
+            if p99_match:
+                fps_info["percentile_99"] = int(p99_match.group(1))
+            # 估算FPS (假设每帧16.67ms为60fps)
+            if fps_info["percentile_50"] > 0:
+                fps_info["fps"] = round(1000 / fps_info["percentile_50"], 1)
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return fps_info
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def reset_fps_counter():
+            """重置FPS计数器"""
+            self.adb._run_shell(f"dumpsys gfxinfo {package_name} reset")
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"FPS计数器已重置: {package_name}")
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def monitor_fps():
+            """
+            持续监控FPS
+            参数:
+                package_name: 应用包名
+                duration: 监控时长(秒)
+                interval: 采样间隔(秒)
+            """
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"\n开始监控FPS: {package_name}")
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"时长: {duration}秒, 间隔: {interval}秒")
+            # 重置计数器
+            self.reset_fps_counter(package_name)
+            results = []
+            start_time = time.time()
+            while time.time() - start_time < duration:
+                fps_info = self.get_fps_info(package_name)
+                # append() - 列表末尾添加元素
+                # 语法: 列表.append(元素)
+                # 返回值: None（直接修改原列表）
+                results.append(fps_info)
+                # print() - 打印输出
+                # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+                # 作用: 把内容输出到控制台
+                print(f"  FPS: {fps_info.get('fps', 0)}, "
+                      f"Janky: {fps_info.get('janky_percent', 0)}%, "
+                      f"P90: {fps_info.get('percentile_90', 0)}ms")
+                time.sleep(interval)
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return results
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section2():
+    """第二部分：响应时间监控"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第二部分：响应时间监控")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    # 【类定义】
+    # 语法: class 类名:
+    # 作用: 创建对象模板，封装数据和方法
+    class ResponseTimeMonitor:
+        """响应时间监控器"""
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def __init__():
+            self.measurements = []
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def measure():
+            """
+            测量函数执行时间
+            参数:
+                name: 测量名称
+                func: 要测量的函数
+                *args, **kwargs: 函数参数
+            返回:
+                函数返回值
+            """
+            start = time.time()
+            result = func(*args, **kwargs)
+            elapsed = time.time() - start
+            measurement = {
+                "name": name,
+                "timestamp": datetime.now().isoformat(),
+                "elapsed_ms": round(elapsed * 1000, 2),
+            }
+            self.measurements.append(measurement)
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"  [{name}] 耗时: {measurement['elapsed_ms']}ms")
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return result
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def measure_api_call():
+            """
+            测量API调用时间
+            参数:
+                client: API客户端
+                method: HTTP方法
+                endpoint: 接口路径
+                **kwargs: 其他参数
+            """
+            start = time.time()
+            if method.upper() == "GET":
+                response = client.get(endpoint, **kwargs)
+            elif method.upper() == "POST":
+                response = client.post(endpoint, **kwargs)
+            elif method.upper() == "PUT":
+                response = client.put(endpoint, **kwargs)
+            elif method.upper() == "DELETE":
+                response = client.delete(endpoint, **kwargs)
+            else:
+                # raise - 主动抛出异常
+                # 作用: 当遇到错误条件时，主动抛出异常
+                raise ValueError(f"不支持的方法: {method}")
+            elapsed = time.time() - start
+            measurement = {
+                "name": f"{method.upper()} {endpoint}",
+                "timestamp": datetime.now().isoformat(),
+                "elapsed_ms": round(elapsed * 1000, 2),
+                "status_code": getattr(response, 'status_code', 0),
+            }
+            self.measurements.append(measurement)
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"  [{measurement['name']}] 耗时: {measurement['elapsed_ms']}ms, "
+                  f"状态: {measurement['status_code']}")
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return response
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def get_summary():
+            """获取统计摘要"""
+            if not self.measurements:
+                # return - 返回值
+                # 作用: 将结果返回给调用者，结束函数执行
+                return {}
+            elapsed_values = [m["elapsed_ms"] for m in self.measurements]
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return {
+                "total_calls": len(self.measurements),
+                "avg_ms": round(sum(elapsed_values) / len(elapsed_values), 2),
+                "min_ms": min(elapsed_values),
+                "max_ms": max(elapsed_values),
+                "measurements": self.measurements,
+            }
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def reset():
+            """重置测量数据"""
+            self.measurements = []
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section3():
+    """第三部分：电池监控"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第三部分：电池监控")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    # 【类定义】
+    # 语法: class 类名:
+    # 作用: 创建对象模板，封装数据和方法
+    class BatteryMonitor:
+        """电池监控器"""
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def __init__():
+            self.adb = adb_helper
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def get_battery_info():
+            """
+            获取电池信息
+            返回:
+                电池信息字典
+            """
+            output = self.adb._run_shell("dumpsys battery")
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return self._parse_battery_info(output)
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def _parse_battery_info():
+            """解析电池信息"""
+            battery_info = {
+                "timestamp": datetime.now().isoformat(),
+                "level": 0,
+                "scale": 100,
+                "percent": 0,
+                "status": "",
+                "health": "",
+                "temperature": 0,
+                "voltage": 0,
+                "technology": "",
+            }
+            # 解析电量
+            level_match = re.search(r'level:\s+(\d+)', output)
+            if level_match:
+                battery_info["level"] = int(level_match.group(1))
+            # 解析总量
+            scale_match = re.search(r'scale:\s+(\d+)', output)
+            if scale_match:
+                battery_info["scale"] = int(scale_match.group(1))
+            # 计算百分比
+            if battery_info["scale"] > 0:
+                battery_info["percent"] = round(
+                    battery_info["level"] / battery_info["scale"] * 100, 1
+                )
+            # 解析状态
+            status_match = re.search(r'status:\s+(\d+)', output)
+            if status_match:
+                status_codes = {
+                    "1": "UNKNOWN",
+                    "2": "CHARGING",
+                    "3": "DISCHARGING",
+                    "4": "NOT_CHARGING",
+                    "5": "FULL",
+                }
+                battery_info["status"] = status_codes.get(status_match.group(1), "UNKNOWN")
+            # 解析温度 (单位是0.1度)
+            temp_match = re.search(r'temperature:\s+(\d+)', output)
+            if temp_match:
+                battery_info["temperature"] = int(temp_match.group(1)) / 10
+            # 解析电压
+            voltage_match = re.search(r'voltage:\s+(\d+)', output)
+            if voltage_match:
+                battery_info["voltage"] = int(voltage_match.group(1))
+            # 解析技术
+            tech_match = re.search(r'technology:\s+(\w+)', output)
+            if tech_match:
+                battery_info["technology"] = tech_match.group(1)
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return battery_info
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def monitor_battery_drain():
+            """
+            监控电池消耗
+            参数:
+                duration: 监控时长(秒)
+                interval: 采样间隔(秒)
+            """
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"\n开始监控电池消耗")
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"时长: {duration}秒, 间隔: {interval}秒")
+            results = []
+            start_time = time.time()
+            while time.time() - start_time < duration:
+                battery_info = self.get_battery_info()
+                # append() - 列表末尾添加元素
+                # 语法: 列表.append(元素)
+                # 返回值: None（直接修改原列表）
+                results.append(battery_info)
+                # print() - 打印输出
+                # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+                # 作用: 把内容输出到控制台
+                print(f"  电量: {battery_info.get('percent', 0)}%, "
+                      f"温度: {battery_info.get('temperature', 0)}°C, "
+                      f"状态: {battery_info.get('status', '')}")
+                time.sleep(interval)
+            # 计算耗电
+            if len(results) >= 2:
+                start_percent = results[0].get("percent", 0)
+                end_percent = results[-1].get("percent", 0)
+                drain = start_percent - end_percent
+                # print() - 打印输出
+                # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+                # 作用: 把内容输出到控制台
+                print(f"\n总耗电: {drain}% ({start_percent}% -> {end_percent}%)")
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return results
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section4():
+    """第四部分：性能报告生成"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第四部分：性能报告生成")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    # 【类定义】
+    # 语法: class 类名:
+    # 作用: 创建对象模板，封装数据和方法
+    class PerformanceReporter:
+        """性能报告生成器"""
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def __init__():
+            self.output_dir = Path(output_dir)
+            self.output_dir.mkdir(exist_ok=True)
+        def generate_report(self, package_name, mem_data, cpu_data, fps_data=None, 
+                           response_data=None, battery_data=None):
+            """
+            生成性能报告
+            参数:
+                package_name: 应用包名
+                mem_data: 内存数据
+                cpu_data: CPU数据
+                fps_data: FPS数据
+                response_data: 响应时间数据
+                battery_data: 电池数据
+            """
+            report = {
+                "report_info": {
+                    "package_name": package_name,
+                    "generated_at": datetime.now().isoformat(),
+                    "version": "1.0",
+                },
+                "summary": self._generate_summary(mem_data, cpu_data, fps_data),
+                "memory": self._analyze_memory(mem_data),
+                "cpu": self._analyze_cpu(cpu_data),
+            }
+            if fps_data:
+                report["fps"] = self._analyze_fps(fps_data)
+            if response_data:
+                report["response_time"] = response_data
+            if battery_data:
+                report["battery"] = self._analyze_battery(battery_data)
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return report
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def _generate_summary():
+            """生成摘要"""
+            summary = {
+                "memory_avg_mb": 0,
+                "memory_max_mb": 0,
+                "cpu_avg_percent": 0,
+                "cpu_max_percent": 0,
+                "fps_avg": 0,
+                "janky_avg_percent": 0,
+            }
+            if mem_data:
+                mem_values = [m.get("total_pss_mb", 0) for m in mem_data]
+                summary["memory_avg_mb"] = round(sum(mem_values) / len(mem_values), 2)
+                summary["memory_max_mb"] = max(mem_values)
+            if cpu_data:
+                cpu_values = [c.get("cpu_percent", 0) for c in cpu_data]
+                summary["cpu_avg_percent"] = round(sum(cpu_values) / len(cpu_values), 2)
+                summary["cpu_max_percent"] = max(cpu_values)
+            if fps_data:
+                fps_values = [f.get("fps", 0) for f in fps_data]
+                janky_values = [f.get("janky_percent", 0) for f in fps_data]
+                summary["fps_avg"] = round(sum(fps_values) / len(fps_values), 1)
+                summary["janky_avg_percent"] = round(sum(janky_values) / len(janky_values), 2)
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return summary
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def _analyze_memory():
+            """分析内存数据"""
+            if not mem_data:
+                # return - 返回值
+                # 作用: 将结果返回给调用者，结束函数执行
+                return {}
+            total_values = [m.get("total_pss_mb", 0) for m in mem_data]
+            java_values = [m.get("java_heap_mb", 0) for m in mem_data]
+            native_values = [m.get("native_heap_mb", 0) for m in mem_data]
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return {
+                "samples": len(mem_data),
+                "total_pss": {
+                    "avg_mb": round(sum(total_values) / len(total_values), 2),
+                    "max_mb": max(total_values),
+                    "min_mb": min(total_values),
+                },
+                "java_heap": {
+                    "avg_mb": round(sum(java_values) / len(java_values), 2),
+                    "max_mb": max(java_values),
+                },
+                "native_heap": {
+                    "avg_mb": round(sum(native_values) / len(native_values), 2),
+                    "max_mb": max(native_values),
+                },
+            }
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def _analyze_cpu():
+            """分析CPU数据"""
+            if not cpu_data:
+                # return - 返回值
+                # 作用: 将结果返回给调用者，结束函数执行
+                return {}
+            cpu_values = [c.get("cpu_percent", 0) for c in cpu_data]
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return {
+                "samples": len(cpu_data),
+                "avg_percent": round(sum(cpu_values) / len(cpu_values), 2),
+                "max_percent": max(cpu_values),
+                "min_percent": min(cpu_values),
+            }
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def _analyze_fps():
+            """分析FPS数据"""
+            if not fps_data:
+                # return - 返回值
+                # 作用: 将结果返回给调用者，结束函数执行
+                return {}
+            fps_values = [f.get("fps", 0) for f in fps_data]
+            janky_values = [f.get("janky_percent", 0) for f in fps_data]
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return {
+                "samples": len(fps_data),
+                "avg_fps": round(sum(fps_values) / len(fps_values), 1),
+                "min_fps": min(fps_values),
+                "avg_janky_percent": round(sum(janky_values) / len(janky_values), 2),
+            }
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def _analyze_battery():
+            """分析电池数据"""
+            if not battery_data or len(battery_data) < 2:
+                # return - 返回值
+                # 作用: 将结果返回给调用者，结束函数执行
+                return {}
+            start = battery_data[0]
+            end = battery_data[-1]
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return {
+                "samples": len(battery_data),
+                "start_percent": start.get("percent", 0),
+                "end_percent": end.get("percent", 0),
+                "drain_percent": start.get("percent", 0) - end.get("percent", 0),
+                "avg_temperature": round(
+                    sum(b.get("temperature", 0) for b in battery_data) / len(battery_data), 1
+                ),
+            }
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def save_json_report():
+            """保存JSON格式报告"""
+            if filename is None:
+                filename = f"performance_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            filepath = self.output_dir / filename
+            # 【with 语句】
+            # 作用: 自动管理资源，确保文件等正确关闭
+            # 原理: 使用上下文管理器 __enter__ 和 __exit__
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(report, f, indent=2, ensure_ascii=False)
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"报告已保存: {filepath}")
+            # return - 返回值
+            # 作用: 将结果返回给调用者，结束函数执行
+            return filepath
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def print_report():
+            """打印报告到控制台"""
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print("\n" + "="*60)
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print("性能测试报告")
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print("="*60)
+            info = report.get("report_info", {})
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"\n应用: {info.get('package_name', 'N/A')}")
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"生成时间: {info.get('generated_at', 'N/A')}")
+            summary = report.get("summary", {})
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"\n【摘要】")
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"  平均内存: {summary.get('memory_avg_mb', 0)} MB")
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"  峰值内存: {summary.get('memory_max_mb', 0)} MB")
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"  平均CPU: {summary.get('cpu_avg_percent', 0)}%")
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"  峰值CPU: {summary.get('cpu_max_percent', 0)}%")
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"  平均FPS: {summary.get('fps_avg', 0)}")
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print(f"  平均卡顿率: {summary.get('janky_avg_percent', 0)}%")
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section5():
+    """第五部分：演示"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第五部分：演示")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    # 【函数定义】
+    # 语法: def 函数名(参数):
+    # 作用: 封装可复用的代码块
+    # 调用: 函数名(参数)
+    def demo_performance_monitoring():
+        """演示完整性能监控"""
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("\n" + "="*60)
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("完整性能监控演示")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("="*60)
+        # 模拟数据
+        # from...import - 从模块导入特定内容
+        # 作用: 只导入需要的函数/类，不用写模块名前缀
+        from day19.lesson import ADBHelper, MemoryMonitor, CPUMonitor
+        adb = ADBHelper()
+        package_name = "com.example.app"
+        # 模拟内存数据
+        mem_monitor = MemoryMonitor(adb)
+        mem_data = [
+            {"timestamp": "2024-01-01T10:00:00", "total_pss_mb": 150},
+            {"timestamp": "2024-01-01T10:00:05", "total_pss_mb": 155},
+            {"timestamp": "2024-01-01T10:00:10", "total_pss_mb": 160},
+        ]
+        # 模拟CPU数据
+        cpu_data = [
+            {"timestamp": "2024-01-01T10:00:00", "cpu_percent": 25},
+            {"timestamp": "2024-01-01T10:00:05", "cpu_percent": 30},
+            {"timestamp": "2024-01-01T10:00:10", "cpu_percent": 28},
+        ]
+        # FPS监控
+        fps_monitor = FPSMonitor(adb)
+        fps_data = [
+            {"timestamp": "2024-01-01T10:00:00", "fps": 58, "janky_percent": 2.5},
+            {"timestamp": "2024-01-01T10:00:05", "fps": 55, "janky_percent": 3.2},
+            {"timestamp": "2024-01-01T10:00:10", "fps": 60, "janky_percent": 1.8},
+        ]
+        # 生成报告
+        reporter = PerformanceReporter()
+        report = reporter.generate_report(
+            package_name=package_name,
+            mem_data=mem_data,
+            cpu_data=cpu_data,
+            fps_data=fps_data,
+        )
+        reporter.print_report(report)
+        reporter.save_json_report(report)
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section6():
+    """今日学习要点总结"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("今日学习要点总结")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    """
+    1. FPS监控:
+       - dumpsys gfxinfo获取帧率
+       - 解析Janky frames
+       - 计算百分位延迟
+    2. 响应时间:
+       - 测量函数执行时间
+       - 测量API调用时间
+       - 统计分析
+    3. 电池监控:
+       - dumpsys battery获取电量
+       - 监控耗电情况
+       - 温度监控
+    4. 报告生成:
+       - 数据汇总
+       - 统计分析
+       - JSON报告输出
+    验证标准：能生成完整的性能监控报告
+    """
+    # 运行演示
+    if __name__ == "__main__":
+        demo_performance_monitoring()
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def practice_task():
+    """实战任务"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("实战任务")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("请修改代码完成任务...")
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def show_answer():
+    """显示参考答案"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("参考答案")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("请参考原文件中的答案部分")
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def show_summary():
+    """显示学习总结"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("学习总结")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("请参考原文件中的总结部分")
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def main():
+    """主菜单"""
+    while True:
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("\n" + "="*60)
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("Day {day_num}: 学习菜单")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("="*60)
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("1. 第一部分：FPS监控")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("2. 第二部分：响应时间监控")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("3. 第三部分：电池监控")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("4. 第四部分：性能报告生成")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("5. 第五部分：演示")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("6. 今日学习要点总结")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("9. 实战任务")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("8. 参考答案")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("7. 学习总结")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("0. 退出")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("="*60)
+        
+        choice = input("\n请选择 (0-9): ").strip()
+        
+        if choice == "1":
+            section1()
+        if choice == "2":
+            section2()
+        if choice == "3":
+            section3()
+        if choice == "4":
+            section4()
+        if choice == "5":
+            section5()
+        if choice == "6":
+            section6()
+        elif choice == "9":
+            practice_task()
+        elif choice == "8":
+            show_answer()
+        elif choice == "7":
+            show_summary()
+        elif choice == "0":
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print("\n感谢学习！再见！")
+            break
+        else:
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print("\n无效选择，请重新输入")
+        
+        # input() - 获取用户输入
+        # 语法: input(提示信息)
+        # 返回值: 用户输入的字符串
+        input("\n按回车键继续...")
+
+
+if __name__ == "__main__":
+    main()

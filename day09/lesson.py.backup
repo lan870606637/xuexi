@@ -1,0 +1,427 @@
+# -*- coding: utf-8 -*-
+"""
+Day 9: Day 9
+"""
+
+
+def section1():
+    """第一部分：Setup和Teardown"""
+    print("\n" + "="*60)
+    print("第一部分：Setup和Teardown")
+    print("="*60)
+    """
+    Pytest提供多种setup/teardown方式:
+    1. 函数级别: setup_method/teardown_method
+    2. 类级别: setup_class/teardown_class
+    3. 模块级别: setup_module/teardown_module
+    """
+    # 模块级别
+    def setup_module():
+        print("\n[Module] 模块开始")
+    def teardown_module():
+        print("[Module] 模块结束")
+    class TestWithSetup:
+        """演示setup/teardown"""
+        @classmethod
+        def setup_class(cls):
+            """类级别：整个类开始前执行一次"""
+            print("[Class] 测试类开始")
+            cls.shared_resource = "共享资源"
+        @classmethod
+        def teardown_class(cls):
+            """类级别：整个类结束后执行一次"""
+            print("[Class] 测试类结束")
+        def setup_method(self):
+            """方法级别：每个测试方法前执行"""
+            print("[Method] 测试方法开始")
+            self.test_data = "测试数据"
+        def teardown_method(self):
+            """方法级别：每个测试方法后执行"""
+            print("[Method] 测试方法结束")
+        def test_one(self):
+            print(f"  执行test_one: {self.test_data}, {self.shared_resource}")
+            assert True
+        def test_two(self):
+            print(f"  执行test_two: {self.test_data}, {self.shared_resource}")
+            assert True
+
+
+def section2():
+    """第二部分：Fixture基础"""
+    print("\n" + "="*60)
+    print("第二部分：Fixture基础")
+    print("="*60)
+    """
+    Fixture是Pytest最强大的特性，用于:
+    - 准备测试数据
+    - 初始化测试环境
+    - 清理测试资源
+    """
+    @pytest.fixture
+    def sample_data():
+        """简单的fixture"""
+        print("\n[Fixture] 创建sample_data")
+        return {"name": "test", "value": 123}
+    def test_using_fixture(sample_data):
+        """使用fixture"""
+        print(f"  使用fixture: {sample_data}")
+        assert sample_data["name"] == "test"
+        assert sample_data["value"] == 123
+    # Fixture可以返回任意类型
+    @pytest.fixture
+    def database_connection():
+        """模拟数据库连接"""
+        print("\n[Fixture] 连接数据库")
+        conn = {"status": "connected", "id": 1}
+        yield conn  # yield之前的代码是setup，之后的是teardown
+        print("[Fixture] 关闭数据库连接")
+    def test_query(database_connection):
+        """使用数据库连接"""
+        print(f"  使用连接: {database_connection}")
+        assert database_connection["status"] == "connected"
+
+
+def section3():
+    """第三部分：Fixture作用域"""
+    print("\n" + "="*60)
+    print("第三部分：Fixture作用域")
+    print("="*60)
+    """
+    Fixture作用域 (scope参数):
+    - function: 每个测试函数 (默认)
+    - class: 每个测试类
+    - module: 每个模块
+    - package: 每个包
+    - session: 整个测试会话
+    """
+    @pytest.fixture(scope="function")
+    def func_scope():
+        """函数级别"""
+        print("\n[Function Scope] 创建")
+        yield "function"
+        print("[Function Scope] 销毁")
+    @pytest.fixture(scope="class")
+    def class_scope():
+        """类级别"""
+        print("\n[Class Scope] 创建")
+        yield "class"
+        print("[Class Scope] 销毁")
+    @pytest.fixture(scope="module")
+    def module_scope():
+        """模块级别"""
+        print("\n[Module Scope] 创建")
+        yield "module"
+        print("[Module Scope] 销毁")
+    class TestScopes:
+        """测试不同作用域"""
+        def test_1(self, func_scope, class_scope, module_scope):
+            print(f"  test_1: {func_scope}, {class_scope}, {module_scope}")
+        def test_2(self, func_scope, class_scope, module_scope):
+            print(f"  test_2: {func_scope}, {class_scope}, {module_scope}")
+
+
+def section4():
+    """第四部分：Fixture参数化"""
+    print("\n" + "="*60)
+    print("第四部分：Fixture参数化")
+    print("="*60)
+    @pytest.fixture(params=["chrome", "firefox", "safari"])
+    def browser(request):
+        """参数化fixture"""
+        return request.param
+    def test_browser_support(browser):
+        """每个参数都会运行一次"""
+        print(f"\n  测试浏览器: {browser}")
+        assert browser in ["chrome", "firefox", "safari"]
+    # 多个参数组合
+    @pytest.fixture(params=[
+        ("admin", "123456"),
+        ("user", "password"),
+        ("guest", "guest"),
+    ])
+    def credentials(request):
+        """多组登录凭证"""
+        return request.param
+    def test_login_with_credentials(credentials):
+        """每组凭证都会运行一次"""
+        username, password = credentials
+        print(f"\n  测试登录: {username}/{password}")
+        assert len(username) > 0
+        assert len(password) > 0
+
+
+def section5():
+    """第五部分：Fixture依赖"""
+    print("\n" + "="*60)
+    print("第五部分：Fixture依赖")
+    print("="*60)
+    @pytest.fixture
+    def first():
+        """第一个fixture"""
+        print("\n[First] 执行")
+        return "first"
+    @pytest.fixture
+    def second(first):
+        """依赖first的fixture"""
+        print("[Second] 执行")
+        return f"second({first})"
+    @pytest.fixture
+    def third(second):
+        """依赖second的fixture"""
+        print("[Third] 执行")
+        return f"third({second})"
+    def test_fixture_chain(third):
+        """测试fixture链"""
+        print(f"  结果: {third}")
+        assert "first" in third
+        assert "second" in third
+        assert "third" in third
+
+
+def section6():
+    """第六部分：使用conftest.py"""
+    print("\n" + "="*60)
+    print("第六部分：使用conftest.py")
+    print("="*60)
+    """
+    conftest.py用于存放共享的fixture:
+    1. 同一目录下的测试文件共享
+    2. 子目录继承父目录的conftest.py
+    3. 可以有多层conftest.py
+    目录结构示例:
+    project/
+    ├── conftest.py          # 全局fixture
+    ├── test_module1.py
+    └── subpackage/
+        ├── conftest.py      # 子包fixture
+        └── test_module2.py
+    """
+    # 在当前目录创建conftest.py文件
+    conftest_content = '''
+    import pytest
+    @pytest.fixture(scope="session")
+    def global_config():
+        """全局配置fixture"""
+        print("\\n[Global] 加载全局配置")
+        return {
+            "env": "test",
+            "base_url": "http://localhost:8080"
+        }
+    @pytest.fixture
+    def api_client(global_config):
+        """API客户端"""
+        print("\\n[API Client] 创建")
+        client = {"base_url": global_config["base_url"], "headers": {}}
+        yield client
+        print("[API Client] 销毁")
+    '''
+    # 创建conftest.py
+    with open("conftest.py", "w", encoding="utf-8") as f:
+        f.write(conftest_content)
+    print("\n已创建conftest.py")
+    def test_use_conftest_fixture(global_config, api_client):
+        """使用conftest.py中的fixture"""
+        print(f"\n  全局配置: {global_config}")
+        print(f"  API客户端: {api_client}")
+        assert global_config["env"] == "test"
+        assert "base_url" in api_client
+
+
+def section7():
+    """第七部分：内置Fixture"""
+    print("\n" + "="*60)
+    print("第七部分：内置Fixture")
+    print("="*60)
+    def test_builtin_fixtures(tmp_path, capsys, monkeypatch):
+        """使用内置fixture"""
+        # tmp_path: 临时目录
+        print(f"\n  临时目录: {tmp_path}")
+        temp_file = tmp_path / "test.txt"
+        temp_file.write_text("hello")
+        assert temp_file.read_text() == "hello"
+        # capsys: 捕获输出
+        print("被捕获的输出")
+        captured = capsys.readouterr()
+        assert "被捕获的输出" in captured.out
+        # monkeypatch: 临时修改
+        import os
+        monkeypatch.setenv("TEST_VAR", "test_value")
+        assert os.getenv("TEST_VAR") == "test_value"
+
+
+def section8():
+    """实战任务：编写带Fixture的测试"""
+    print("\n" + "="*60)
+    print("实战任务：编写带Fixture的测试")
+    print("="*60)
+    """
+    任务：为下面的API类编写测试，使用fixture
+    """
+    class SimpleAPI:
+        """简单API类"""
+        def __init__(self, base_url):
+            self.base_url = base_url
+            self.token = None
+        def login(self, username, password):
+            """登录获取token"""
+            if username == "admin" and password == "123":
+                self.token = "fake_token_123"
+                return {"success": True, "token": self.token}
+            return {"success": False, "error": "认证失败"}
+        def get_user(self, user_id):
+            """获取用户信息"""
+            if not self.token:
+                return {"error": "未登录"}
+            if user_id == 1:
+                return {"id": 1, "name": "Alice"}
+            return {"error": "用户不存在"}
+    # 请在这里编写fixture和测试用例
+    # 提示：
+    # 1. 创建api fixture，初始化SimpleAPI
+    # 2. 创建authenticated_api fixture，返回已登录的API实例
+    # 3. 编写测试用例测试各种场景
+
+
+def section9():
+    """参考答案（完成后对照）"""
+    print("\n" + "="*60)
+    print("参考答案（完成后对照）")
+    print("="*60)
+    """
+    @pytest.fixture
+    def api():
+        return SimpleAPI("http://localhost:8080")
+    @pytest.fixture
+    def authenticated_api(api):
+        api.login("admin", "123")
+        return api
+    class TestSimpleAPI:
+        def test_login_success(self, api):
+            result = api.login("admin", "123")
+            assert result["success"] is True
+            assert "token" in result
+        def test_login_failure(self, api):
+            result = api.login("admin", "wrong")
+            assert result["success"] is False
+        def test_get_user_without_auth(self, api):
+            result = api.get_user(1)
+            assert "error" in result
+        def test_get_user_with_auth(self, authenticated_api):
+            result = authenticated_api.get_user(1)
+            assert result["id"] == 1
+            assert result["name"] == "Alice"
+        def test_get_nonexistent_user(self, authenticated_api):
+            result = authenticated_api.get_user(999)
+            assert "error" in result
+    """
+
+
+def section10():
+    """今日学习要点总结"""
+    print("\n" + "="*60)
+    print("今日学习要点总结")
+    print("="*60)
+    """
+    1. Setup/Teardown:
+       - setup_method/teardown_method (方法级别)
+       - setup_class/teardown_class (类级别)
+       - setup_module/teardown_module (模块级别)
+    2. Fixture:
+       - @pytest.fixture装饰器
+       - yield实现setup和teardown
+       - scope参数控制作用域
+    3. Fixture高级:
+       - params参数化
+       - fixture可以相互依赖
+       - conftest.py共享fixture
+    4. 内置Fixture:
+       - tmp_path: 临时目录
+       - capsys: 捕获输出
+       - monkeypatch: 临时修改
+    验证标准：能写出带fixture的测试用例
+    """
+
+def practice_task():
+    """实战任务"""
+    print("\n" + "="*60)
+    print("实战任务")
+    print("="*60)
+    print("请修改代码完成任务...")
+
+
+def show_answer():
+    """显示参考答案"""
+    print("\n" + "="*60)
+    print("参考答案")
+    print("="*60)
+    print("请参考原文件中的答案部分")
+
+
+def show_summary():
+    """显示学习总结"""
+    print("\n" + "="*60)
+    print("学习总结")
+    print("="*60)
+    print("请参考原文件中的总结部分")
+
+def main():
+    """主菜单"""
+    while True:
+        print("\n" + "="*60)
+        print("Day {day_num}: 学习菜单")
+        print("="*60)
+        print("1. 第一部分：Setup和Teardown")
+        print("2. 第二部分：Fixture基础")
+        print("3. 第三部分：Fixture作用域")
+        print("4. 第四部分：Fixture参数化")
+        print("5. 第五部分：Fixture依赖")
+        print("6. 第六部分：使用conftest.py")
+        print("7. 第七部分：内置Fixture")
+        print("8. 实战任务：编写带Fixture的测试")
+        print("9. 参考答案（完成后对照）")
+        print("10. 今日学习要点总结")
+        print("9. 实战任务")
+        print("8. 参考答案")
+        print("7. 学习总结")
+        print("0. 退出")
+        print("="*60)
+        
+        choice = input("\n请选择 (0-9): ").strip()
+        
+        if choice == "1":
+            section1()
+        if choice == "2":
+            section2()
+        if choice == "3":
+            section3()
+        if choice == "4":
+            section4()
+        if choice == "5":
+            section5()
+        if choice == "6":
+            section6()
+        if choice == "7":
+            section7()
+        if choice == "8":
+            section8()
+        if choice == "9":
+            section9()
+        if choice == "10":
+            section10()
+        elif choice == "9":
+            practice_task()
+        elif choice == "8":
+            show_answer()
+        elif choice == "7":
+            show_summary()
+        elif choice == "0":
+            print("\n感谢学习！再见！")
+            break
+        else:
+            print("\n无效选择，请重新输入")
+        
+        input("\n按回车键继续...")
+
+
+if __name__ == "__main__":
+    main()

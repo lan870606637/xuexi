@@ -1,0 +1,565 @@
+# -*- coding: utf-8 -*-
+"""
+Day 17: Day 17
+"""
+
+
+def section1():
+    """第一部分：HTTP基础"""
+    print("\n" + "="*60)
+    print("第一部分：HTTP基础")
+    print("="*60)
+    """
+    HTTP请求方法:
+    - GET: 获取资源
+    - POST: 创建资源
+    - PUT: 更新资源 (完整更新)
+    - PATCH: 部分更新
+    - DELETE: 删除资源
+    HTTP状态码:
+    - 2xx: 成功 (200 OK, 201 Created, 204 No Content)
+    - 3xx: 重定向 (301 Moved, 302 Found)
+    - 4xx: 客户端错误 (400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found)
+    - 5xx: 服务器错误 (500 Internal Error, 502 Bad Gateway, 503 Service Unavailable)
+    常见Content-Type:
+    - application/json: JSON数据
+    - application/x-www-form-urlencoded: 表单数据
+    - multipart/form-data: 文件上传
+    - text/html: HTML文档
+    """
+
+
+def section2():
+    """第二部分：Requests基础"""
+    print("\n" + "="*60)
+    print("第二部分：Requests基础")
+    print("="*60)
+    """
+    安装: pip install requests
+    基本用法:
+    import requests
+    # GET请求
+    response = requests.get("https://api.example.com/users")
+    # POST请求
+    response = requests.post(
+        "https://api.example.com/users",
+        json={"name": "John", "age": 30}
+    )
+    """
+    # 模拟requests (无网络环境)
+    class MockResponse:
+        """模拟HTTP响应"""
+        def __init__(self, status_code=200, json_data=None, text="", headers=None):
+            self.status_code = status_code
+            self._json = json_data or {}
+            self.text = text
+            self.headers = headers or {}
+        def json(self):
+            return self._json
+        def raise_for_status(self):
+            if self.status_code >= 400:
+                raise Exception(f"HTTP Error: {self.status_code}")
+    class MockRequests:
+        """模拟requests库"""
+        _users = {
+            1: {"id": 1, "username": "admin", "email": "admin@example.com"},
+            2: {"id": 2, "username": "user", "email": "user@example.com"},
+        }
+        _tokens = {}
+        @classmethod
+        def get(cls, url, params=None, headers=None, **kwargs):
+            """GET请求"""
+            print(f"[GET] {url}")
+            print(f"  Params: {params}")
+            print(f"  Headers: {headers}")
+            # 模拟/users接口
+            if "/users" in url and "/users/" not in url:
+                return MockResponse(200, {"users": list(cls._users.values())})
+            # 模拟/users/{id}接口
+            if "/users/" in url:
+                user_id = int(url.split("/")[-1])
+                user = cls._users.get(user_id)
+                if user:
+                    return MockResponse(200, user)
+                return MockResponse(404, {"error": "User not found"})
+            return MockResponse(404)
+        @classmethod
+        def post(cls, url, data=None, json=None, headers=None, **kwargs):
+            """POST请求"""
+            print(f"[POST] {url}")
+            print(f"  Data: {data}")
+            print(f"  JSON: {json}")
+            print(f"  Headers: {headers}")
+            # 模拟登录接口
+            if "/login" in url:
+                username = (json or data or {}).get("username")
+                password = (json or data or {}).get("password")
+                if username == "admin" and password == "123456":
+                    token = "fake_token_12345"
+                    cls._tokens[token] = username
+                    return MockResponse(200, {
+                        "success": True,
+                        "token": token,
+                        "user": {"username": username}
+                    })
+                return MockResponse(401, {
+                    "success": False,
+                    "error": "Invalid credentials"
+                })
+            # 模拟创建用户
+            if "/users" in url:
+                new_id = max(cls._users.keys()) + 1
+                new_user = {"id": new_id, **(json or {})}
+                cls._users[new_id] = new_user
+                return MockResponse(201, new_user)
+            return MockResponse(404)
+        @classmethod
+        def put(cls, url, data=None, json=None, headers=None, **kwargs):
+            """PUT请求"""
+            print(f"[PUT] {url}")
+            # 模拟更新用户
+            if "/users/" in url:
+                user_id = int(url.split("/")[-1])
+                if user_id in cls._users:
+                    cls._users[user_id].update(json or {})
+                    return MockResponse(200, cls._users[user_id])
+                return MockResponse(404)
+            return MockResponse(404)
+        @classmethod
+        def delete(cls, url, headers=None, **kwargs):
+            """DELETE请求"""
+            print(f"[DELETE] {url}")
+            # 模拟删除用户
+            if "/users/" in url:
+                user_id = int(url.split("/")[-1])
+                if user_id in cls._users:
+                    del cls._users[user_id]
+                    return MockResponse(204)
+                return MockResponse(404)
+            return MockResponse(404)
+    # 使用模拟requests
+    requests = MockRequests
+
+
+def section3():
+    """第三部分：接口请求示例"""
+    print("\n" + "="*60)
+    print("第三部分：接口请求示例")
+    print("="*60)
+    def demo_requests():
+        """演示requests用法"""
+        print("\n" + "="*60)
+        print("Requests用法演示")
+        print("="*60)
+        # 1. GET请求
+        print("\n1. GET请求:")
+        response = requests.get("https://api.example.com/users")
+        print(f"Status: {response.status_code}")
+        print(f"Data: {response.json()}")
+        # 2. GET带参数
+        print("\n2. GET带参数:")
+        response = requests.get(
+            "https://api.example.com/users",
+            params={"page": 1, "limit": 10}
+        )
+        # 3. POST请求 (JSON)
+        print("\n3. POST请求 (JSON):")
+        response = requests.post(
+            "https://api.example.com/users",
+            json={"username": "newuser", "email": "new@example.com"}
+        )
+        print(f"Status: {response.status_code}")
+        print(f"Data: {response.json()}")
+        # 4. POST请求 (表单)
+        print("\n4. POST请求 (表单):")
+        response = requests.post(
+            "https://api.example.com/login",
+            data={"username": "admin", "password": "123456"}
+        )
+        print(f"Status: {response.status_code}")
+        print(f"Data: {response.json()}")
+        # 5. 带Header的请求
+        print("\n5. 带Header的请求:")
+        response = requests.get(
+            "https://api.example.com/users/1",
+            headers={
+                "Authorization": "Bearer fake_token",
+                "Accept": "application/json"
+            }
+        )
+        print(f"Data: {response.json()}")
+        # 6. PUT请求
+        print("\n6. PUT请求:")
+        response = requests.put(
+            "https://api.example.com/users/1",
+            json={"email": "updated@example.com"}
+        )
+        print(f"Data: {response.json()}")
+        # 7. DELETE请求
+        print("\n7. DELETE请求:")
+        response = requests.delete("https://api.example.com/users/2")
+        print(f"Status: {response.status_code}")
+
+
+def section4():
+    """第四部分：响应处理"""
+    print("\n" + "="*60)
+    print("第四部分：响应处理")
+    print("="*60)
+    def demo_response_handling():
+        """演示响应处理"""
+        print("\n" + "="*60)
+        print("响应处理演示")
+        print("="*60)
+        response = requests.get("https://api.example.com/users")
+        # 状态码检查
+        print(f"\n状态码: {response.status_code}")
+        print(f"是否成功: {response.status_code == 200}")
+        # JSON解析
+        try:
+            data = response.json()
+            print(f"JSON数据: {data}")
+        except:
+            print("响应不是JSON格式")
+        # 原始文本
+        print(f"原始文本: {response.text}")
+        # 响应头
+        print(f"响应头: {response.headers}")
+        # 错误处理
+        try:
+            response.raise_for_status()
+            print("请求成功")
+        except Exception as e:
+            print(f"请求失败: {e}")
+
+
+def section5():
+    """第五部分：接口测试封装"""
+    print("\n" + "="*60)
+    print("第五部分：接口测试封装")
+    print("="*60)
+    class APIClient:
+        """
+        API客户端
+        封装常用的HTTP请求
+        """
+        def __init__(self, base_url, headers=None):
+            self.base_url = base_url.rstrip("/")
+            self.session = MockRequests  # 实际: requests.Session()
+            self.headers = headers or {}
+            self.last_response = None
+        def _make_url(self, endpoint):
+            """构建完整URL"""
+            endpoint = endpoint.lstrip("/")
+            return f"{self.base_url}/{endpoint}"
+        def get(self, endpoint, params=None, headers=None):
+            """GET请求"""
+            url = self._make_url(endpoint)
+            merged_headers = {**self.headers, **(headers or {})}
+            self.last_response = self.session.get(url, params=params, headers=merged_headers)
+            return self.last_response
+        def post(self, endpoint, data=None, json=None, headers=None):
+            """POST请求"""
+            url = self._make_url(endpoint)
+            merged_headers = {**self.headers, **(headers or {})}
+            self.last_response = self.session.post(url, data=data, json=json, headers=merged_headers)
+            return self.last_response
+        def put(self, endpoint, data=None, json=None, headers=None):
+            """PUT请求"""
+            url = self._make_url(endpoint)
+            merged_headers = {**self.headers, **(headers or {})}
+            self.last_response = self.session.put(url, data=data, json=json, headers=merged_headers)
+            return self.last_response
+        def delete(self, endpoint, headers=None):
+            """DELETE请求"""
+            url = self._make_url(endpoint)
+            merged_headers = {**self.headers, **(headers or {})}
+            self.last_response = self.session.delete(url, headers=merged_headers)
+            return self.last_response
+        def set_token(self, token):
+            """设置认证Token"""
+            self.headers["Authorization"] = f"Bearer {token}"
+        def assert_status(self, expected_status):
+            """断言状态码"""
+            actual = self.last_response.status_code
+            assert actual == expected_status, f"期望状态码: {expected_status}, 实际: {actual}"
+        def assert_json_path(self, path, expected_value):
+            """
+            断言JSON路径
+            path: 点号分隔的路径 (如 "data.user.name")
+            """
+            data = self.last_response.json()
+            keys = path.split(".")
+            for key in keys:
+                if isinstance(data, dict):
+                    data = data.get(key)
+                else:
+                    raise AssertionError(f"无法访问路径: {path}")
+            assert data == expected_value, f"路径 {path}: 期望 {expected_value}, 实际 {data}"
+
+
+def section6():
+    """第六部分：接口测试用例"""
+    print("\n" + "="*60)
+    print("第六部分：接口测试用例")
+    print("="*60)
+    class TestAPI:
+        """接口测试类"""
+        @pytest.fixture
+        def client(self):
+            """API客户端"""
+            return APIClient("https://api.example.com")
+        @pytest.fixture
+        def auth_client(self, client):
+            """已认证的客户端"""
+            # 登录获取token
+            response = client.post("/login", json={
+                "username": "admin",
+                "password": "123456"
+            })
+            token = response.json().get("token")
+            client.set_token(token)
+            return client
+        def test_get_users(self, client):
+            """测试获取用户列表"""
+            response = client.get("/users")
+            client.assert_status(200)
+            data = response.json()
+            assert "users" in data
+        def test_get_user_by_id(self, client):
+            """测试获取单个用户"""
+            response = client.get("/users/1")
+            client.assert_status(200)
+            assert response.json()["id"] == 1
+        def test_login_success(self, client):
+            """测试登录成功"""
+            response = client.post("/login", json={
+                "username": "admin",
+                "password": "123456"
+            })
+            client.assert_status(200)
+            assert response.json()["success"] is True
+            assert "token" in response.json()
+        def test_login_failure(self, client):
+            """测试登录失败"""
+            response = client.post("/login", json={
+                "username": "admin",
+                "password": "wrong"
+            })
+            client.assert_status(401)
+            assert response.json()["success"] is False
+        def test_create_user(self, auth_client):
+            """测试创建用户"""
+            response = auth_client.post("/users", json={
+                "username": "testuser",
+                "email": "test@example.com"
+            })
+            auth_client.assert_status(201)
+            assert response.json()["username"] == "testuser"
+
+
+def section7():
+    """实战任务：编写接口测试"""
+    print("\n" + "="*60)
+    print("实战任务：编写接口测试")
+    print("="*60)
+    """
+    任务：为以下接口编写测试用例
+    接口列表:
+    1. GET /api/products - 获取商品列表
+    2. GET /api/products/{id} - 获取商品详情
+    3. POST /api/cart - 添加商品到购物车
+    4. GET /api/cart - 获取购物车
+    5. POST /api/orders - 创建订单
+    6. GET /api/orders/{id} - 获取订单详情
+    """
+    class ProductAPIClient(APIClient):
+        """商品API客户端"""
+        def get_products(self, category=None):
+            """获取商品列表"""
+            params = {"category": category} if category else None
+            return self.get("/api/products", params=params)
+        def get_product(self, product_id):
+            """获取商品详情"""
+            return self.get(f"/api/products/{product_id}")
+        def add_to_cart(self, product_id, quantity=1):
+            """添加到购物车"""
+            return self.post("/api/cart", json={
+                "product_id": product_id,
+                "quantity": quantity
+            })
+        def get_cart(self):
+            """获取购物车"""
+            return self.get("/api/cart")
+        def create_order(self, address, items):
+            """创建订单"""
+            return self.post("/api/orders", json={
+                "address": address,
+                "items": items
+            })
+        def get_order(self, order_id):
+            """获取订单详情"""
+            return self.get(f"/api/orders/{order_id}")
+    # 请完成下面的测试用例
+    class TestProductAPI:
+        """商品接口测试"""
+        # 你的代码写在这里
+        pass
+
+
+def section8():
+    """参考答案（完成后对照）"""
+    print("\n" + "="*60)
+    print("参考答案（完成后对照）")
+    print("="*60)
+    """
+    class TestProductAPI:
+        @pytest.fixture
+        def client(self):
+            return ProductAPIClient("https://api.example.com")
+        @pytest.fixture
+        def auth_client(self, client):
+            client.post("/login", json={"username": "admin", "password": "123456"})
+            client.set_token("fake_token")
+            return client
+        def test_get_products(self, client):
+            response = client.get_products()
+            client.assert_status(200)
+            assert "products" in response.json()
+        def test_get_product_detail(self, client):
+            response = client.get_product(1)
+            client.assert_status(200)
+            assert response.json()["id"] == 1
+        def test_add_to_cart(self, auth_client):
+            response = auth_client.add_to_cart(1, 2)
+            client.assert_status(200)
+            assert response.json()["success"] is True
+        def test_get_cart(self, auth_client):
+            auth_client.add_to_cart(1, 1)
+            response = auth_client.get_cart()
+            client.assert_status(200)
+            assert "items" in response.json()
+        def test_create_order(self, auth_client):
+            response = auth_client.create_order(
+                address="北京市",
+                items=[{"product_id": 1, "quantity": 2}]
+            )
+            client.assert_status(201)
+            assert "order_id" in response.json()
+    """
+
+
+def section9():
+    """今日学习要点总结"""
+    print("\n" + "="*60)
+    print("今日学习要点总结")
+    print("="*60)
+    """
+    1. HTTP基础:
+       - 请求方法: GET, POST, PUT, DELETE
+       - 状态码: 2xx成功, 4xx客户端错误, 5xx服务器错误
+       - Content-Type
+    2. Requests库:
+       - requests.get(), requests.post()
+       - params, json, data, headers参数
+       - response.status_code, response.json()
+    3. 响应处理:
+       - 状态码检查
+       - JSON解析
+       - 错误处理
+    4. 接口封装:
+       - APIClient类
+       - 统一处理base_url和headers
+       - 断言方法封装
+    5. 测试用例:
+       - 认证处理
+       - 参数化测试
+       - 链式调用
+    验证标准：能完成3-5个接口的自动化测试
+    """
+    # 运行演示
+    if __name__ == "__main__":
+        demo_requests()
+        demo_response_handling()
+
+def practice_task():
+    """实战任务"""
+    print("\n" + "="*60)
+    print("实战任务")
+    print("="*60)
+    print("请修改代码完成任务...")
+
+
+def show_answer():
+    """显示参考答案"""
+    print("\n" + "="*60)
+    print("参考答案")
+    print("="*60)
+    print("请参考原文件中的答案部分")
+
+
+def show_summary():
+    """显示学习总结"""
+    print("\n" + "="*60)
+    print("学习总结")
+    print("="*60)
+    print("请参考原文件中的总结部分")
+
+def main():
+    """主菜单"""
+    while True:
+        print("\n" + "="*60)
+        print("Day {day_num}: 学习菜单")
+        print("="*60)
+        print("1. 第一部分：HTTP基础")
+        print("2. 第二部分：Requests基础")
+        print("3. 第三部分：接口请求示例")
+        print("4. 第四部分：响应处理")
+        print("5. 第五部分：接口测试封装")
+        print("6. 第六部分：接口测试用例")
+        print("7. 实战任务：编写接口测试")
+        print("8. 参考答案（完成后对照）")
+        print("9. 今日学习要点总结")
+        print("9. 实战任务")
+        print("8. 参考答案")
+        print("7. 学习总结")
+        print("0. 退出")
+        print("="*60)
+        
+        choice = input("\n请选择 (0-9): ").strip()
+        
+        if choice == "1":
+            section1()
+        if choice == "2":
+            section2()
+        if choice == "3":
+            section3()
+        if choice == "4":
+            section4()
+        if choice == "5":
+            section5()
+        if choice == "6":
+            section6()
+        if choice == "7":
+            section7()
+        if choice == "8":
+            section8()
+        if choice == "9":
+            section9()
+        elif choice == "9":
+            practice_task()
+        elif choice == "8":
+            show_answer()
+        elif choice == "7":
+            show_summary()
+        elif choice == "0":
+            print("\n感谢学习！再见！")
+            break
+        else:
+            print("\n无效选择，请重新输入")
+        
+        input("\n按回车键继续...")
+
+
+if __name__ == "__main__":
+    main()

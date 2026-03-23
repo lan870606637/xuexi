@@ -1,0 +1,1068 @@
+# -*- coding: utf-8 -*-
+"""
+Day 21: Day 21
+"""
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section1():
+    """第一部分：Jenkins基础"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第一部分：Jenkins基础")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    """
+    Jenkins是什么？
+    - 开源的持续集成/持续部署(CI/CD)工具
+    - 自动化构建、测试、部署
+    - 丰富的插件生态
+    安装Jenkins:
+    1. 下载: https://www.jenkins.io/download/
+    2. 安装Java (Jenkins需要Java运行)
+    3. 运行: java -jar jenkins.war
+    4. 访问: http://localhost:8080
+    5. 按提示完成初始化
+    常用插件:
+    - Git Plugin: Git集成
+    - Allure Plugin: Allure报告
+    - HTML Publisher: HTML报告
+    - Email Extension: 邮件通知
+    - Build Pipeline: 流水线视图
+    """
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section2():
+    """第二部分：Jenkins Pipeline"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第二部分：Jenkins Pipeline")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    JENKINSFILE_EXAMPLE = '''
+    // Jenkinsfile - 定义Pipeline
+    pipeline {
+        agent any  // 在任何可用节点运行
+        environment {
+            // 环境变量
+            PYTHON_VERSION = '3.9'
+            TEST_ENV = 'staging'
+        }
+        stages {
+            stage('Checkout') {
+                steps {
+                    // 拉取代码
+                    git branch: 'main', 
+                        url: 'https://github.com/your-repo/test-automation.git'
+                }
+            }
+            stage('Setup') {
+                steps {
+                    // 安装依赖
+                    sh 'pip install -r requirements.txt'
+                }
+            }
+            stage('Test') {
+                steps {
+                    // 运行测试
+                    sh 'pytest tests/ -v --alluredir=allure-results'
+                }
+            }
+            stage('Report') {
+                steps {
+                    // 生成Allure报告
+                    allure([
+                        includeProperties: false,
+                        jdk: '',
+                        properties: [],
+                        reportBuildPolicy: 'ALWAYS',
+                        results: [[path: 'allure-results']]
+                    ])
+                }
+            }
+        }
+        post {
+            always {
+                // 总是执行
+                echo '测试完成'
+            }
+            success {
+                // 成功时执行
+                echo '测试通过!'
+            }
+            failure {
+                // 失败时执行
+                echo '测试失败!'
+                mail to: 'team@example.com',
+                     subject: "测试失败: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                     body: "请检查: ${env.BUILD_URL}"
+            }
+        }
+    }
+    '''
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("Jenkinsfile示例:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print(JENKINSFILE_EXAMPLE)
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section3():
+    """第三部分：Allure报告"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第三部分：Allure报告")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    """
+    Allure是一个灵活的测试报告工具
+    安装:
+    pip install allure-pytest
+    生成报告:
+    1. 运行测试生成结果:
+       pytest --alluredir=./allure-results
+    2. 生成并查看报告:
+       allure serve ./allure-results
+    3. 生成静态报告:
+       allure generate ./allure-results -o ./allure-report --clean
+    """
+    ALLURE_DECORATORS = '''
+    # Allure装饰器示例
+    # import - 导入模块
+    # 作用: 引入其他模块的功能使用
+    import allure
+    # import - 导入模块
+    # 作用: 引入其他模块的功能使用
+    import pytest
+    # 【装饰器 @allure】
+    # 作用: 在不修改原函数的情况下，添加额外功能
+    # 原理: 接收函数作为参数，返回新函数
+    @allure.feature("用户管理")  # 功能模块
+    # 【装饰器 @allure】
+    # 作用: 在不修改原函数的情况下，添加额外功能
+    # 原理: 接收函数作为参数，返回新函数
+    @allure.story("用户登录")    # 用户故事
+    # 【装饰器 @allure】
+    # 作用: 在不修改原函数的情况下，添加额外功能
+    # 原理: 接收函数作为参数，返回新函数
+    @allure.severity(allure.severity_level.CRITICAL)  # 严重程度
+    # 【类定义】
+    # 语法: class 类名:
+    # 作用: 创建对象模板，封装数据和方法
+    class TestLogin:
+        # 【装饰器 @allure】
+        # 作用: 在不修改原函数的情况下，添加额外功能
+        # 原理: 接收函数作为参数，返回新函数
+        @allure.title("测试正常登录")  # 用例标题
+        # 【装饰器 @allure】
+        # 作用: 在不修改原函数的情况下，添加额外功能
+        # 原理: 接收函数作为参数，返回新函数
+        @allure.description("使用正确的用户名密码登录")  # 描述
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def test_login_success():
+            # 【with 语句】
+            # 作用: 自动管理资源，确保文件等正确关闭
+            # 原理: 使用上下文管理器 __enter__ 和 __exit__
+            with allure.step("输入用户名"):  # 测试步骤
+                username = "admin"
+                allure.attach(username, "用户名")  # 附加信息
+            # 【with 语句】
+            # 作用: 自动管理资源，确保文件等正确关闭
+            # 原理: 使用上下文管理器 __enter__ 和 __exit__
+            with allure.step("输入密码"):
+                password = "123456"
+                allure.attach(password, "密码")
+            # 【with 语句】
+            # 作用: 自动管理资源，确保文件等正确关闭
+            # 原理: 使用上下文管理器 __enter__ 和 __exit__
+            with allure.step("点击登录"):
+                result = login(username, password)
+                allure.attach(str(result), "登录结果")
+            # assert - 断言
+            # 语法: assert 条件, 错误信息
+            # 作用: 条件为False时抛出AssertionError
+            assert result["success"] is True
+        # 【装饰器 @allure】
+        # 作用: 在不修改原函数的情况下，添加额外功能
+        # 原理: 接收函数作为参数，返回新函数
+        @allure.title("测试登录失败")
+        # 【装饰器 @pytest】
+        # 作用: 在不修改原函数的情况下，添加额外功能
+        # 原理: 接收函数作为参数，返回新函数
+        @pytest.mark.parametrize("username,password", [
+            ("admin", "wrong"),
+            ("", "123456"),
+        ])
+        # 【函数定义】
+        # 语法: def 函数名(参数):
+        # 作用: 封装可复用的代码块
+        # 调用: 函数名(参数)
+        def test_login_failure():
+            allure.dynamic.title(f"测试登录失败: {username}/{password}")
+            result = login(username, password)
+            # assert - 断言
+            # 语法: assert 条件, 错误信息
+            # 作用: 条件为False时抛出AssertionError
+            assert result["success"] is False
+    '''
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\nAllure装饰器示例:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print(ALLURE_DECORATORS)
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section4():
+    """第四部分：Git集成"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第四部分：Git集成")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    GIT_WORKFLOW = """
+    Git工作流:
+    1. 初始化仓库
+    git init
+    2. 添加远程仓库
+    git remote add origin https://github.com/your-repo.git
+    3. 添加文件
+    git add .
+    4. 提交
+    git commit -m "Initial commit"
+    5. 推送
+    git push -u origin main
+    6. 创建分支
+    git checkout -b feature/new-feature
+    7. 合并分支
+    git checkout main
+    git merge feature/new-feature
+    8. 标签
+    git tag -a v1.0 -m "Version 1.0"
+    git push origin v1.0
+    .gitignore示例:
+    # Python
+    __pycache__/
+    *.py[cod]
+    *$py.class
+    *.so
+    .Python
+    env/
+    venv/
+    .venv/
+    # IDE
+    .idea/
+    .vscode/
+    *.swp
+    *.swo
+    # 测试
+    .pytest_cache/
+    .coverage
+    htmlcov/
+    allure-results/
+    allure-report/
+    # 日志和报告
+    logs/
+    reports/
+    screenshots/
+    *.log
+    # 配置
+    config/local.yaml
+    .env
+    """
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print(GIT_WORKFLOW)
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section5():
+    """第五部分：项目部署脚本"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第五部分：项目部署脚本")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    SETUP_SCRIPT = '''#!/bin/bash
+    # setup.sh - 项目部署脚本
+    echo "=== 开始部署测试环境 ==="
+    # 1. 检查Python版本
+    python_version=$(python3 --version 2>&1 | awk '{print $2}')
+    echo "Python版本: $python_version"
+    # 2. 创建虚拟环境
+    echo "创建虚拟环境..."
+    python3 -m venv venv
+    source venv/bin/activate
+    # 3. 安装依赖
+    echo "安装依赖..."
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    # 4. 检查Appium
+    echo "检查Appium..."
+    appium --version
+    # 5. 创建目录
+    echo "创建目录..."
+    mkdir -p logs reports screenshots data
+    # 6. 运行测试
+    echo "运行测试..."
+    pytest tests/ -v --html=reports/report.html --self-contained-html
+    echo "=== 部署完成 ==="
+    '''
+    # 保存部署脚本
+    # 【with 语句】
+    # 作用: 自动管理资源，确保文件等正确关闭
+    # 原理: 使用上下文管理器 __enter__ 和 __exit__
+    with open("setup.sh", "w", encoding="utf-8") as f:
+        f.write(SETUP_SCRIPT)
+    # Windows版本
+    SETUP_BAT = '''@echo off
+    REM setup.bat - Windows部署脚本
+    echo === 开始部署测试环境 ===
+    REM 1. 检查Python
+    python --version
+    REM 2. 创建虚拟环境
+    echo 创建虚拟环境...
+    python -m venv venv
+    venv\\Scripts\\activate
+    REM 3. 安装依赖
+    echo 安装依赖...
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    REM 4. 创建目录
+    echo 创建目录...
+    if not exist logs mkdir logs
+    if not exist reports mkdir reports
+    if not exist screenshots mkdir screenshots
+    if not exist data mkdir data
+    echo === 部署完成 ===
+    pause
+    '''
+    # 【with 语句】
+    # 作用: 自动管理资源，确保文件等正确关闭
+    # 原理: 使用上下文管理器 __enter__ 和 __exit__
+    with open("setup.bat", "w", encoding="utf-8") as f:
+        f.write(SETUP_BAT)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n部署脚本已生成: setup.sh, setup.bat")
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section6():
+    """第六部分：requirements.txt"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第六部分：requirements.txt")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    REQUIREMENTS = """# 基础依赖
+    pytest>=7.0.0
+    pytest-html>=3.2.0
+    pytest-xdist>=2.5.0
+    pytest-rerunfailures>=10.0
+    allure-pytest>=2.9.0
+    # Appium
+    Appium-Python-Client>=2.0.0
+    selenium>=4.0.0
+    # 接口测试
+    requests>=2.28.0
+    # 数据处理
+    PyYAML>=6.0
+    # 报告
+    jinja2>=3.0.0
+    # 工具
+    python-dotenv>=0.20.0
+    """
+    # 【with 语句】
+    # 作用: 自动管理资源，确保文件等正确关闭
+    # 原理: 使用上下文管理器 __enter__ 和 __exit__
+    with open("requirements.txt", "w", encoding="utf-8") as f:
+        f.write(REQUIREMENTS)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("requirements.txt已生成")
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section7():
+    """第七部分：pytest.ini配置"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第七部分：pytest.ini配置")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    PYTEST_INI = """[pytest]
+    # 测试目录
+    testpaths = tests
+    # 标记定义
+    markers =
+        smoke: 冒烟测试
+        regression: 回归测试
+        integration: 集成测试
+        performance: 性能测试
+        slow: 慢速测试
+    # 默认参数
+    addopts = 
+        -v
+        --tb=short
+        --strict-markers
+        --html=reports/report.html
+        --self-contained-html
+        --alluredir=allure-results
+    # 过滤器
+    filterwarnings =
+        ignore::DeprecationWarning
+        ignore::PendingDeprecationWarning
+    # 日志
+    log_cli = true
+    log_cli_level = INFO
+    log_cli_format = %(asctime)s [%(levelname)s] %(message)s
+    log_cli_date_format = %Y-%m-%d %H:%M:%S
+    """
+    # 【with 语句】
+    # 作用: 自动管理资源，确保文件等正确关闭
+    # 原理: 使用上下文管理器 __enter__ 和 __exit__
+    with open("pytest.ini", "w", encoding="utf-8") as f:
+        f.write(PYTEST_INI)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("pytest.ini已生成")
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section8():
+    """第八部分：学习总结"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第八部分：学习总结")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    SUMMARY = """
+    ================================================================================
+                            21天学习总结
+    ================================================================================
+    【第一阶段：Python基础 (Day 1-7)】
+    ✅ Day 1: 数据类型与变量
+       - 数字、字符串、布尔值
+       - 列表、字典操作
+       - 类型转换
+    ✅ Day 2: 控制流
+       - if-elif-else条件判断
+       - for/while循环
+       - break/continue
+    ✅ Day 3: 函数
+       - 函数定义和调用
+       - 参数类型(位置、默认、*args、**kwargs)
+       - 返回值
+    ✅ Day 4: 类与对象
+       - 类的定义
+       - self和构造方法
+       - 继承和多态
+    ✅ Day 5: 异常处理
+       - try-except-finally
+       - 自定义异常
+       - 重试机制
+    ✅ Day 6: 文件处理
+       - 文件读写
+       - JSON/YAML解析
+       - CSV处理
+    ✅ Day 7: 装饰器与上下文管理器
+       - 装饰器原理
+       - 日志/重试装饰器
+       - with语句
+    【第二阶段：测试框架 (Day 8-14)】
+    ✅ Day 8-9: Pytest基础
+       - 测试发现和运行
+       - 断言和标记
+       - Fixture机制
+    ✅ Day 10-11: Pytest高级
+       - 参数化测试
+       - 插件使用
+       - 测试报告
+    ✅ Day 12-13: Appium基础
+       - Desired Capabilities
+       - 元素定位
+       - 常用操作和手势
+    ✅ Day 14: POM设计模式
+       - 页面对象封装
+       - 元素集中管理
+       - 测试代码组织
+    【第三阶段：实战项目 (Day 15-21)】
+    ✅ Day 15-16: 框架搭建
+       - 配置管理
+       - 日志封装
+       - Driver工厂
+       - 断言封装
+    ✅ Day 17-18: 接口自动化
+       - requests库
+       - 接口鉴权
+       - 高级断言
+    ✅ Day 19-20: 性能监控
+       - ADB命令
+       - CPU/内存监控
+       - FPS监控
+       - 报告生成
+    ✅ Day 21: 持续集成
+       - Jenkins基础
+       - Allure报告
+       - Git集成
+    ================================================================================
+                               核心产出
+    ================================================================================
+    1. 一套可运行的测试框架
+       - 配置管理
+       - 日志系统
+       - POM结构
+       - 报告生成
+    2. 至少10个测试用例
+       - 功能自动化用例
+       - 接口测试用例
+       - 性能监控脚本
+    3. 完整的学习笔记
+       - 知识点总结
+       - 踩坑记录
+       - 代码模板
+    ================================================================================
+                               后续学习建议
+    ================================================================================
+    1. 深入学习
+       - 设计模式
+       - 测试架构
+       - DevOps工具链
+    2. 扩展技能
+       - 性能测试(JMeter/Locust)
+       - 安全测试
+       - 容器化(Docker/K8s)
+    3. 最佳实践
+       - 代码审查
+       - 持续改进
+       - 团队协作
+    ================================================================================
+                                  结语
+    ================================================================================
+    恭喜你完成21天的学习！
+    记住：
+    - 每天都要写代码，不要只看不练
+    - AI是你的助手，不是替身
+    - 遇到问题先思考，再求助
+    - 持续学习，保持好奇心
+    祝你测试开发之路顺利！
+    ================================================================================
+    """
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print(SUMMARY)
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section9():
+    """第九部分：检查清单"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第九部分：检查清单")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    CHECKLIST = """
+    ================================================================================
+                             项目检查清单
+    ================================================================================
+    【环境配置】
+    □ Python 3.8+ 已安装
+    □ pip 已配置
+    □ virtualenv/venv 可用
+    □ Node.js 已安装 (Appium需要)
+    □ Appium Server 可运行
+    □ Android SDK 已配置
+    □ 模拟器/真机可连接
+    【项目结构】
+    □ config/ 目录存在
+    □ pages/ 目录存在
+    □ tests/ 目录存在
+    □ utils/ 目录存在
+    □ reports/ 目录存在
+    □ logs/ 目录存在
+    □ data/ 目录存在
+    【配置文件】
+    □ requirements.txt 已创建
+    □ pytest.ini 已配置
+    □ .gitignore 已配置
+    □ Jenkinsfile 已创建
+    【核心文件】
+    □ config/config.yaml 配置管理
+    □ utils/driver_factory.py Driver工厂
+    □ utils/logger.py 日志封装
+    □ utils/assertions.py 断言封装
+    □ pages/base_page.py 基础页面对象
+    □ conftest.py 共享fixture
+    【测试用例】
+    □ tests/test_login.py 登录测试
+    □ tests/test_api.py 接口测试
+    □ tests/test_performance.py 性能测试
+    【文档】
+    □ README.md 项目说明
+    □ docs/ 设计文档
+    □ reports/allure-report/ 测试报告
+    ================================================================================
+                                  验证标准
+    ================================================================================
+    1. 环境验证:
+       □ python --version 显示3.8+
+       □ pytest --version 正常
+       □ adb devices 显示设备
+       □ appium --version 正常
+    2. 代码验证:
+       □ pytest tests/ 能运行
+       □ 没有语法错误
+       □ 代码风格统一
+    3. 功能验证:
+       □ 能启动App
+       □ 能执行测试
+       □ 能生成报告
+    4. CI验证:
+       □ Jenkins能拉取代码
+       □ 能自动运行测试
+       □ 能生成Allure报告
+    验证标准：能自动运行测试并生成报告
+    ================================================================================
+    """
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print(CHECKLIST)
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section10():
+    """第十部分：快速开始指南"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第十部分：快速开始指南")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    QUICK_START = """
+    ================================================================================
+                               快速开始指南
+    ================================================================================
+    1. 克隆项目
+    cd c:\\Users\\user\\Desktop\\jiaoben\\xuexi
+    2. 创建虚拟环境
+    python -m venv venv
+    venv\\Scripts\\activate  # Windows
+    source venv/bin/activate  # Linux/Mac
+    3. 安装依赖
+    pip install -r requirements.txt
+    4. 配置环境
+    - 复制 config/config.example.yaml 为 config/config.yaml
+    - 修改配置为你的环境
+    5. 运行测试
+    # 运行所有测试
+    pytest
+    # 运行冒烟测试
+    pytest -m smoke
+    # 生成Allure报告
+    pytest --alluredir=./allure-results
+    allure serve ./allure-results
+    6. 查看报告
+    - HTML报告: reports/report.html
+    - Allure报告: allure serve 后访问 http://localhost:port
+    ================================================================================
+    """
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print(QUICK_START)
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section11():
+    """今日学习要点总结"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("今日学习要点总结")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    """
+    1. Jenkins:
+       - Pipeline定义
+       - 阶段和步骤
+       - 报告集成
+       - 邮件通知
+    2. Allure报告:
+       - 装饰器使用
+       - 步骤记录
+       - 附件添加
+       - 报告生成
+    3. Git集成:
+       - 工作流
+       - .gitignore
+       - 分支管理
+       - 标签
+    4. 项目部署:
+       - 依赖管理
+       - 环境配置
+       - 自动化脚本
+       - 检查清单
+    验证标准：能自动运行测试并生成报告
+    """
+    # 运行演示
+    if __name__ == "__main__":
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("Day 21 完成！")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("21天学习计划已全部完成！")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("\n生成的文件:")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("  - setup.sh (Linux/Mac部署脚本)")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("  - setup.bat (Windows部署脚本)")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("  - requirements.txt (Python依赖)")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("  - pytest.ini (Pytest配置)")
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def practice_task():
+    """实战任务"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("实战任务")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("请修改代码完成任务...")
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def show_answer():
+    """显示参考答案"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("参考答案")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("请参考原文件中的答案部分")
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def show_summary():
+    """显示学习总结"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("学习总结")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("请参考原文件中的总结部分")
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def main():
+    """主菜单"""
+    while True:
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("\n" + "="*60)
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("Day {day_num}: 学习菜单")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("="*60)
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("1. 第一部分：Jenkins基础")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("2. 第二部分：Jenkins Pipeline")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("3. 第三部分：Allure报告")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("4. 第四部分：Git集成")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("5. 第五部分：项目部署脚本")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("6. 第六部分：requirements.txt")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("7. 第七部分：pytest.ini配置")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("8. 第八部分：学习总结")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("9. 第九部分：检查清单")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("10. 第十部分：快速开始指南")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("11. 今日学习要点总结")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("9. 实战任务")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("8. 参考答案")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("7. 学习总结")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("0. 退出")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("="*60)
+        
+        choice = input("\n请选择 (0-9): ").strip()
+        
+        if choice == "1":
+            section1()
+        if choice == "2":
+            section2()
+        if choice == "3":
+            section3()
+        if choice == "4":
+            section4()
+        if choice == "5":
+            section5()
+        if choice == "6":
+            section6()
+        if choice == "7":
+            section7()
+        if choice == "8":
+            section8()
+        if choice == "9":
+            section9()
+        if choice == "10":
+            section10()
+        if choice == "11":
+            section11()
+        elif choice == "9":
+            practice_task()
+        elif choice == "8":
+            show_answer()
+        elif choice == "7":
+            show_summary()
+        elif choice == "0":
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print("\n感谢学习！再见！")
+            break
+        else:
+            # print() - 打印输出
+            # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+            # 作用: 把内容输出到控制台
+            print("\n无效选择，请重新输入")
+        
+        # input() - 获取用户输入
+        # 语法: input(提示信息)
+        # 返回值: 用户输入的字符串
+        input("\n按回车键继续...")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,568 @@
+# -*- coding: utf-8 -*-
+"""
+Day 15: Day 15
+"""
+
+
+def section1():
+    """第一部分：项目结构"""
+    print("\n" + "="*60)
+    print("第一部分：项目结构")
+    print("="*60)
+    PROJECT_STRUCTURE = """
+    项目结构:
+    my_test_framework/
+    ├── config/                 # 配置文件
+    │   ├── config.yaml        # 主配置
+    │   ├── android_caps.yaml  # Android配置
+    │   └── ios_caps.yaml      # iOS配置
+    ├── pages/                  # 页面对象
+    │   ├── base_page.py
+    │   ├── login_page.py
+    │   └── home_page.py
+    ├── tests/                  # 测试用例
+    │   ├── conftest.py
+    │   └── test_login.py
+    ├── utils/                  # 工具类
+    │   ├── logger.py          # 日志工具
+    │   ├── config_reader.py   # 配置读取
+    │   └── driver_factory.py  # Driver工厂
+    ├── reports/                # 测试报告
+    │   └── .gitkeep
+    ├── logs/                   # 日志文件
+    │   └── .gitkeep
+    ├── screenshots/            # 截图
+    │   └── .gitkeep
+    ├── data/                   # 测试数据
+    │   └── test_data.json
+    ├── requirements.txt
+    └── pytest.ini
+    """
+    print(PROJECT_STRUCTURE)
+
+
+def section2():
+    """第二部分：配置管理"""
+    print("\n" + "="*60)
+    print("第二部分：配置管理")
+    print("="*60)
+    class ConfigReader:
+        """
+        配置读取器
+        支持YAML和JSON格式
+        """
+        def __init__(self, config_dir="config"):
+            self.config_dir = Path(config_dir)
+            self._configs = {}
+        def load(self, filename):
+            """
+            加载配置文件
+            参数:
+                filename: 配置文件名
+            返回:
+                配置字典
+            """
+            if filename in self._configs:
+                return self._configs[filename]
+            file_path = self.config_dir / filename
+            if not file_path.exists():
+                raise FileNotFoundError(f"配置文件不存在: {file_path}")
+            with open(file_path, "r", encoding="utf-8") as f:
+                if filename.endswith(".yaml") or filename.endswith(".yml"):
+                    config = yaml.safe_load(f)
+                elif filename.endswith(".json"):
+                    config = json.load(f)
+                else:
+                    raise ValueError(f"不支持的配置文件格式: {filename}")
+            self._configs[filename] = config
+            return config
+        def get(self, filename, key=None, default=None):
+            """
+            获取配置值
+            参数:
+                filename: 配置文件名
+                key: 配置键，支持点号分隔 (如 "database.host")
+                default: 默认值
+            """
+            config = self.load(filename)
+            if key is None:
+                return config
+            # 支持嵌套键 (如 "database.host")
+            keys = key.split(".")
+            value = config
+            for k in keys:
+                if isinstance(value, dict) and k in value:
+                    value = value[k]
+                else:
+                    return default
+            return value
+        def reload(self, filename=None):
+            """重新加载配置"""
+            if filename:
+                self._configs.pop(filename, None)
+            else:
+                self._configs.clear()
+    # 配置示例
+    CONFIG_EXAMPLE = """
+    # config/config.yaml
+    environment: test
+    appium:
+      server_url: "http://localhost:4723/wd/hub"
+      implicit_wait: 10
+      explicit_wait: 20
+    database:
+      host: localhost
+      port: 3306
+      name: test_db
+      user: test_user
+      password: test_pass
+    report:
+      screenshot_on_failure: true
+      html_report: true
+      allure_report: true
+    log:
+      level: INFO
+      format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+      file: logs/test.log
+    """
+    print("\n配置示例:")
+    print(CONFIG_EXAMPLE)
+
+
+def section3():
+    """第三部分：日志封装"""
+    print("\n" + "="*60)
+    print("第三部分：日志封装")
+    print("="*60)
+    class Logger:
+        """
+        日志工具类
+        封装Python logging模块
+        """
+        _loggers = {}
+        @classmethod
+        def get_logger(cls, name="test", log_dir="logs", level=logging.INFO):
+            """
+            获取日志记录器
+            参数:
+                name: 日志名称
+                log_dir: 日志目录
+                level: 日志级别
+            """
+            if name in cls._loggers:
+                return cls._loggers[name]
+            # 创建logger
+            logger = logging.getLogger(name)
+            logger.setLevel(level)
+            # 避免重复添加handler
+            if logger.handlers:
+                return logger
+            # 创建日志目录
+            log_path = Path(log_dir)
+            log_path.mkdir(parents=True, exist_ok=True)
+            # 日志格式
+            formatter = logging.Formatter(
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S"
+            )
+            # 控制台handler
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(level)
+            console_handler.setFormatter(formatter)
+            logger.addHandler(console_handler)
+            # 文件handler
+            log_file = log_path / f"{name}_{datetime.now().strftime('%Y%m%d')}.log"
+            file_handler = logging.FileHandler(log_file, encoding="utf-8")
+            file_handler.setLevel(level)
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+            cls._loggers[name] = logger
+            return logger
+        @classmethod
+        def debug(cls, message, name="test"):
+            """记录debug日志"""
+            cls.get_logger(name).debug(message)
+        @classmethod
+        def info(cls, message, name="test"):
+            """记录info日志"""
+            cls.get_logger(name).info(message)
+        @classmethod
+        def warning(cls, message, name="test"):
+            """记录warning日志"""
+            cls.get_logger(name).warning(message)
+        @classmethod
+        def error(cls, message, name="test"):
+            """记录error日志"""
+            cls.get_logger(name).error(message)
+        @classmethod
+        def critical(cls, message, name="test"):
+            """记录critical日志"""
+            cls.get_logger(name).critical(message)
+    # 日志装饰器
+    def log_step(step_name):
+        """
+        步骤日志装饰器
+        使用示例:
+            @log_step("输入用户名")
+            def input_username(self, username):
+                self.send_keys(self.USERNAME_INPUT, username)
+        """
+        def decorator(func):
+            def wrapper(*args, **kwargs):
+                logger = Logger.get_logger()
+                logger.info(f"[步骤] {step_name}")
+                try:
+                    result = func(*args, **kwargs)
+                    logger.info(f"[步骤] {step_name} - 成功")
+                    return result
+                except Exception as e:
+                    logger.error(f"[步骤] {step_name} - 失败: {e}")
+                    raise
+            return wrapper
+        return decorator
+    def log_test(test_func):
+        """
+        测试用例日志装饰器
+        """
+        def wrapper(*args, **kwargs):
+            logger = Logger.get_logger()
+            test_name = test_func.__name__
+            logger.info(f"{'='*60}")
+            logger.info(f"[测试开始] {test_name}")
+            logger.info(f"{'='*60}")
+            try:
+                result = test_func(*args, **kwargs)
+                logger.info(f"[测试通过] {test_name}")
+                return result
+            except Exception as e:
+                logger.error(f"[测试失败] {test_name}: {e}")
+                raise
+            finally:
+                logger.info(f"{'='*60}\n")
+        return wrapper
+
+
+def section4():
+    """第四部分：Driver工厂"""
+    print("\n" + "="*60)
+    print("第四部分：Driver工厂")
+    print("="*60)
+    class DriverFactory:
+        """
+        WebDriver工厂类
+        负责创建和管理Driver实例
+        """
+        _driver = None
+        _config_reader = ConfigReader()
+        @classmethod
+        def get_driver(cls, platform=None, config_file="android_caps.yaml"):
+            """
+            获取Driver实例 (单例模式)
+            参数:
+                platform: 平台 (android/ios)
+                config_file: 配置文件名
+            """
+            if cls._driver is None:
+                cls._driver = cls.create_driver(platform, config_file)
+            return cls._driver
+        @classmethod
+        def create_driver(cls, platform=None, config_file="android_caps.yaml"):
+            """
+            创建新的Driver实例
+            参数:
+                platform: 平台 (android/ios)
+                config_file: 配置文件名
+            """
+            # 读取配置
+            caps = cls._config_reader.load(config_file)
+            # 获取server URL
+            server_url = cls._config_reader.get("config.yaml", "appium.server_url", 
+                                                "http://localhost:4723/wd/hub")
+            logger = Logger.get_logger()
+            logger.info(f"创建Driver: platform={platform}, caps={caps}")
+            # 实际项目中使用:
+            # from appium import webdriver
+            # driver = webdriver.Remote(server_url, caps)
+            # 模拟driver
+            driver = MockDriver(caps)
+            # 设置隐式等待
+            implicit_wait = cls._config_reader.get("config.yaml", "appium.implicit_wait", 10)
+            driver.implicitly_wait(implicit_wait)
+            logger.info("Driver创建成功")
+            return driver
+        @classmethod
+        def quit_driver(cls):
+            """退出Driver"""
+            if cls._driver:
+                logger = Logger.get_logger()
+                logger.info("退出Driver")
+                cls._driver.quit()
+                cls._driver = None
+        @classmethod
+        def restart_driver(cls, platform=None, config_file="android_caps.yaml"):
+            """重启Driver"""
+            cls.quit_driver()
+            return cls.get_driver(platform, config_file)
+    # 模拟Driver
+    class MockDriver:
+        def __init__(self, caps):
+            self.caps = caps
+            self.implicit_wait_time = 0
+        def implicitly_wait(self, seconds):
+            self.implicit_wait_time = seconds
+        def quit(self):
+            pass
+
+
+def section5():
+    """第五部分：基础页面对象 (带日志)"""
+    print("\n" + "="*60)
+    print("第五部分：基础页面对象 (带日志)")
+    print("="*60)
+    class BasePage:
+        """
+        基础页面类 (带日志)
+        """
+        def __init__(self, driver):
+            self.driver = driver
+            self.logger = Logger.get_logger("page")
+        @log_step("查找元素")
+        def find_element(self, locator):
+            """查找元素"""
+            by, value = locator
+            self.logger.debug(f"查找元素: {by}={value}")
+            # 实际: return self.driver.find_element(by, value)
+            return MockElement(by, value)
+        @log_step("点击元素")
+        def click(self, locator):
+            """点击元素"""
+            element = self.find_element(locator)
+            element.click()
+        @log_step("输入文本")
+        def send_keys(self, locator, text):
+            """输入文本"""
+            element = self.find_element(locator)
+            element.clear()
+            element.send_keys(text)
+        def take_screenshot(self, filename=None):
+            """截图"""
+            if filename is None:
+                filename = f"screenshot_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+            screenshot_dir = Path("screenshots")
+            screenshot_dir.mkdir(exist_ok=True)
+            filepath = screenshot_dir / filename
+            self.logger.info(f"截图保存到: {filepath}")
+            # 实际: self.driver.get_screenshot_as_file(str(filepath))
+            return str(filepath)
+    class MockElement:
+        def __init__(self, by, value):
+            self.by = by
+            self.value = value
+        def click(self):
+            pass
+        def clear(self):
+            pass
+        def send_keys(self, text):
+            pass
+
+
+def section6():
+    """实战任务：搭建框架基础"""
+    print("\n" + "="*60)
+    print("实战任务：搭建框架基础")
+    print("="*60)
+    """
+    任务：搭建一个完整的测试框架基础
+    要求:
+    1. 创建配置文件 (config.yaml)
+    2. 实现ConfigReader类
+    3. 实现Logger类
+    4. 实现DriverFactory类
+    5. 实现带日志的BasePage
+    """
+    # 请完成下面的代码
+    class MyConfigReader:
+        """
+        自定义配置读取器
+        要求:
+        1. 支持读取YAML和JSON
+        2. 支持环境变量覆盖配置
+        3. 支持嵌套键访问 (如 "database.host")
+        """
+        def __init__(self, config_dir="config"):
+            # 你的代码
+            pass
+        def load(self, filename):
+            """加载配置文件"""
+            # 你的代码
+            pass
+        def get(self, filename, key=None, default=None):
+            """获取配置值"""
+            # 你的代码
+            pass
+        def _apply_env_override(self, config):
+            """应用环境变量覆盖"""
+            # 你的代码
+            pass
+
+
+def section7():
+    """参考答案（完成后对照）"""
+    print("\n" + "="*60)
+    print("参考答案（完成后对照）")
+    print("="*60)
+    """
+    class MyConfigReader:
+        def __init__(self, config_dir="config"):
+            self.config_dir = Path(config_dir)
+            self._configs = {}
+        def load(self, filename):
+            if filename in self._configs:
+                return self._configs[filename]
+            file_path = self.config_dir / filename
+            if not file_path.exists():
+                raise FileNotFoundError(f"配置文件不存在: {file_path}")
+            with open(file_path, "r", encoding="utf-8") as f:
+                if filename.endswith((".yaml", ".yml")):
+                    config = yaml.safe_load(f)
+                elif filename.endswith(".json"):
+                    config = json.load(f)
+                else:
+                    raise ValueError(f"不支持的格式: {filename}")
+            # 应用环境变量覆盖
+            config = self._apply_env_override(config)
+            self._configs[filename] = config
+            return config
+        def get(self, filename, key=None, default=None):
+            config = self.load(filename)
+            if key is None:
+                return config
+            keys = key.split(".")
+            value = config
+            for k in keys:
+                if isinstance(value, dict) and k in value:
+                    value = value[k]
+                else:
+                    return default
+            return value
+        def _apply_env_override(self, config, prefix=""):
+            if isinstance(config, dict):
+                result = {}
+                for key, value in config.items():
+                    env_key = f"{prefix}_{key.upper()}" if prefix else key.upper()
+                    if isinstance(value, (dict, list)):
+                        result[key] = self._apply_env_override(value, env_key)
+                    else:
+                        env_value = os.getenv(env_key)
+                        result[key] = env_value if env_value is not None else value
+                return result
+            return config
+    """
+
+
+def section8():
+    """今日学习要点总结"""
+    print("\n" + "="*60)
+    print("今日学习要点总结")
+    print("="*60)
+    """
+    1. 项目结构:
+       - config/: 配置文件
+       - pages/: 页面对象
+       - tests/: 测试用例
+       - utils/: 工具类
+       - reports/: 测试报告
+       - logs/: 日志文件
+    2. 配置管理:
+       - 支持YAML/JSON
+       - 嵌套键访问
+       - 环境变量覆盖
+    3. 日志封装:
+       - 统一日志格式
+       - 文件+控制台输出
+       - 日志装饰器
+    4. Driver工厂:
+       - 单例模式
+       - 配置驱动
+       - 自动管理生命周期
+    验证标准：能搭建基础的自动化测试框架
+    """
+
+def practice_task():
+    """实战任务"""
+    print("\n" + "="*60)
+    print("实战任务")
+    print("="*60)
+    print("请修改代码完成任务...")
+
+
+def show_answer():
+    """显示参考答案"""
+    print("\n" + "="*60)
+    print("参考答案")
+    print("="*60)
+    print("请参考原文件中的答案部分")
+
+
+def show_summary():
+    """显示学习总结"""
+    print("\n" + "="*60)
+    print("学习总结")
+    print("="*60)
+    print("请参考原文件中的总结部分")
+
+def main():
+    """主菜单"""
+    while True:
+        print("\n" + "="*60)
+        print("Day {day_num}: 学习菜单")
+        print("="*60)
+        print("1. 第一部分：项目结构")
+        print("2. 第二部分：配置管理")
+        print("3. 第三部分：日志封装")
+        print("4. 第四部分：Driver工厂")
+        print("5. 第五部分：基础页面对象 (带日志)")
+        print("6. 实战任务：搭建框架基础")
+        print("7. 参考答案（完成后对照）")
+        print("8. 今日学习要点总结")
+        print("9. 实战任务")
+        print("8. 参考答案")
+        print("7. 学习总结")
+        print("0. 退出")
+        print("="*60)
+        
+        choice = input("\n请选择 (0-9): ").strip()
+        
+        if choice == "1":
+            section1()
+        if choice == "2":
+            section2()
+        if choice == "3":
+            section3()
+        if choice == "4":
+            section4()
+        if choice == "5":
+            section5()
+        if choice == "6":
+            section6()
+        if choice == "7":
+            section7()
+        if choice == "8":
+            section8()
+        elif choice == "9":
+            practice_task()
+        elif choice == "8":
+            show_answer()
+        elif choice == "7":
+            show_summary()
+        elif choice == "0":
+            print("\n感谢学习！再见！")
+            break
+        else:
+            print("\n无效选择，请重新输入")
+        
+        input("\n按回车键继续...")
+
+
+if __name__ == "__main__":
+    main()
