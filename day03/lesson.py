@@ -48,7 +48,7 @@ def section1():
     # 语法: def 函数名(参数):
     # 作用: 封装可复用的代码块
     # 调用: 函数名(参数)
-    def greet():
+    def greet(name):
         """带参数的函数"""
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
@@ -67,7 +67,7 @@ def section1():
     # 语法: def 函数名(参数):
     # 作用: 封装可复用的代码块
     # 调用: 函数名(参数)
-    def add():
+    def add(a, b):
         """返回两个数的和"""
         # return - 返回值
         # 作用: 将结果返回给调用者，结束函数执行
@@ -88,7 +88,7 @@ def section1():
     # 语法: def 函数名(参数):
     # 作用: 封装可复用的代码块
     # 调用: 函数名(参数)
-    def get_min_max():
+    def get_min_max(numbers):
         """返回列表中的最小值和最大值"""
         # return - 返回值
         # 作用: 将结果返回给调用者，结束函数执行
@@ -134,7 +134,7 @@ def section2():
     # 语法: def 函数名(参数):
     # 作用: 封装可复用的代码块
     # 调用: 函数名(参数)
-    def login():
+    def login(username, password):
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
@@ -151,7 +151,7 @@ def section2():
     # 语法: def 函数名(参数):
     # 作用: 封装可复用的代码块
     # 调用: 函数名(参数)
-    def connect_db():
+    def connect_db(host="localhost", port=3306):
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
@@ -171,7 +171,7 @@ def section2():
     # 语法: def 函数名(参数):
     # 作用: 封装可复用的代码块
     # 调用: 函数名(参数)
-    def create_user():
+    def create_user(name, age=18, role="user"):
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
@@ -209,7 +209,7 @@ def section3():
     # 语法: def 函数名(参数):
     # 作用: 封装可复用的代码块
     # 调用: 函数名(参数)
-    def sum_all():
+    def sum_all(*args):
         """
         *args 会将多余的位置参数打包成元组(tuple)
         args就是一个元组，可以遍历
@@ -247,7 +247,7 @@ def section3():
     # 语法: def 函数名(参数):
     # 作用: 封装可复用的代码块
     # 调用: 函数名(参数)
-    def print_config():
+    def print_config(**kwargs):
         """
         **kwargs 会将多余的关键字参数打包成字典(dict)
         kwargs就是一个字典
@@ -273,7 +273,7 @@ def section3():
     # 语法: def 函数名(参数):
     # 作用: 封装可复用的代码块
     # 调用: 函数名(参数)
-    def complex_function():
+    def complex_function(required, default="默认值", *args, **kwargs):
         """
         参数顺序：
         1. 位置参数 (required)
@@ -330,7 +330,7 @@ def section4():
     # 语法: def 函数名(参数):
     # 作用: 封装可复用的代码块
     # 调用: 函数名(参数)
-    def execute_test():
+    def execute_test(test_func, test_name):
         """执行测试函数"""
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
@@ -454,59 +454,23 @@ def section5():
     # 作用: 把内容输出到控制台
     print(f"  函数外访问: {global_var}")
 
-    # 修改全局变量 (使用global关键字)
-    counter = 0
-
-    # 【函数定义】
-    # 语法: def 函数名(参数):
-    # 作用: 封装可复用的代码块
-    # 调用: 函数名(参数)
-    def increment():
-        nonlocal counter  # 使用nonlocal修改外部变量
-        counter += 1
-        # print() - 打印输出
-        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
-        # 作用: 把内容输出到控制台
-        print(f"  计数器: {counter}")
-
-    # print() - 打印输出
-    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
-    # 作用: 把内容输出到控制台
-    print("\n修改外部变量:")
-    counter = 0
-    # 【函数定义】
-    # 语法: def 函数名(参数):
-    # 作用: 封装可复用的代码块
-    # 调用: 函数名(参数)
+    # 修改外层函数的变量 (使用nonlocal关键字)
+    # 正确用法：需要嵌套函数
     def outer():
-        count = 0
-        # 【函数定义】
-        # 语法: def 函数名(参数):
-        # 作用: 封装可复用的代码块
-        # 调用: 函数名(参数)
-        def inner():
-            nonlocal count
-            count += 1
-            # return - 返回值
-            # 作用: 将结果返回给调用者，结束函数执行
-            return count
-        # return - 返回值
-        # 作用: 将结果返回给调用者，结束函数执行
-        return inner
-    
+        counter = 0
+
+        def increment():
+            nonlocal counter
+            counter += 1
+            print(f"  计数器: {counter}")
+
+        return increment
+
+    print("\n修改外部变量 (nonlocal正确用法):")
     inc = outer()
-    # print() - 打印输出
-    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
-    # 作用: 把内容输出到控制台
-    print(f"  第1次: {inc()}")
-    # print() - 打印输出
-    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
-    # 作用: 把内容输出到控制台
-    print(f"  第2次: {inc()}")
-    # print() - 打印输出
-    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
-    # 作用: 把内容输出到控制台
-    print(f"  第3次: {inc()}")
+    inc()
+    inc()
+    inc()
 
 
 # 模拟driver (实际项目中是真实的WebDriver)
@@ -519,7 +483,7 @@ class MockDriver:
     # 语法: def 函数名(参数):
     # 作用: 封装可复用的代码块
     # 调用: 函数名(参数)
-    def find_element():
+    def find_element(self, by, value):
         # 模拟查找逻辑
         found_elements = {
             ("id", "username"): "找到用户名输入框",
@@ -639,37 +603,35 @@ def show_answer():
 # 语法: def 函数名(参数):
 # 作用: 封装可复用的代码块
 # 调用: 函数名(参数)
-def find_element():
+def find_element(driver, *locators, retry=3):
     # 遍历所有定位方式
     for locator in locators:
         by, value = locator  # 解包
-        
         # 重试机制
         for attempt in range(retry):
-            # 【异常处理 try-except】
-            # 语法: try: ... except 异常类型: ...
-            # 作用: 捕获并处理可能发生的错误，防止程序崩溃
             try:
                 element = driver.find_element(by, value)
-                # print() - 打印输出
-                # 语法: print(值1, 值2, ..., sep=" ", end="\n")
-                # 作用: 把内容输出到控制台
                 print(f"使用 {by}={value} 找到元素")
-                # return - 返回值
-                # 作用: 将结果返回给调用者，结束函数执行
                 return element
             except Exception as e:
-                # print() - 打印输出
-                # 语法: print(值1, 值2, ..., sep=" ", end="\n")
-                # 作用: 把内容输出到控制台
                 print(f"第{attempt+1}次尝试失败: {by}={value}")
                 if attempt == retry - 1:
                     break  # 当前定位方式重试完毕，尝试下一个
-    
+
     # 所有定位方式都失败
     # raise - 主动抛出异常
     # 作用: 当遇到错误条件时，主动抛出异常
     raise Exception(f"所有定位方式都失败: {locators}")
+
+# 调用示例：
+# driver = MockDriver()
+# element = find_element(
+#     driver,
+#     ("id", "username"),
+#     ("xpath", "//input"),
+#     ("css selector", ".btn"),
+#     retry=3
+# )
 '''
     # print() - 打印输出
     # 语法: print(值1, 值2, ..., sep=" ", end="\n")

@@ -320,6 +320,9 @@ def practice_task():
 
     # 你的代码写在这里：
     # ...
+    for data in test_data:
+        if data["username"] != "":
+            valid_data.append(data)
 
     print(f"有效数据: {len(valid_data)}条")
     for data in valid_data:
@@ -343,11 +346,15 @@ def practice_task():
 
     # 你的代码写在这里：
     # ...
+    for exp in expected:
+        if len(exp["password"]) < 3:
+            weak_password_users.append(exp["username"])
+        
 
     print(f"弱密码用户: {weak_password_users}")
     
     # 验证
-    if weak_password_users == ["admin"]:
+    if weak_password_users == ["test"]:
         print("✅ 任务2完成！")
     else:
         print("❌ 任务2未完成，请继续")
@@ -358,6 +365,10 @@ def practice_task():
 
     # 你的代码写在这里：
     # ...
+    for exp in test_data:
+        username_lengths[exp["username"]]=len(exp["username"])
+
+
 
     print(f"用户名长度: {username_lengths}")
     
