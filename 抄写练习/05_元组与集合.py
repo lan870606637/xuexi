@@ -118,3 +118,4 @@ print("\n=== 列表去重 ===")
 data = [1, 3, 2, 3, 1, 4, 2, 5]
 unique = list(set(data))    # 去重（顺序不保证）
 print(unique)
+
