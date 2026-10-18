@@ -1028,6 +1028,221 @@ def section9():
 # 语法: def 函数名(参数):
 # 作用: 封装可复用的代码块
 # 调用: 函数名(参数)
+def section10():
+    """第十部分：Requests实战练习（补充）"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第十部分：Requests实战练习（补充）")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+
+    # ---- 1. requests常用方法速查 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n1. requests常用方法速查:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    import requests
+
+    # GET请求
+    resp = requests.get(url, params={'key': 'value'}, headers={})
+
+    # POST请求 - JSON数据
+    resp = requests.post(url, json={'name': 'test'}, headers={})
+
+    # POST请求 - 表单数据
+    resp = requests.post(url, data={'name': 'test'})
+
+    # POST请求 - 文件上传
+    resp = requests.post(url, files={'file': open('test.png', 'rb')})
+
+    # PUT请求
+    resp = requests.put(url, json={'name': 'updated'})
+
+    # DELETE请求
+    resp = requests.delete(url)
+
+    # 通用参数:
+    # params  - URL查询参数 (GET用)
+    # json    - JSON请求体 (自动设置Content-Type)
+    # data    - 表单请求体
+    # headers - 请求头
+    # timeout - 超时时间(秒)
+    # cookies - Cookie
+    """)
+
+    # ---- 2. 响应对象详解 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("2. 响应对象(Response)详解:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    resp = requests.get('https://api.example.com/users/1')
+
+    # 状态码
+    resp.status_code        # 200, 404, 500 等
+    resp.ok                 # True if 200 <= status_code < 400
+    resp.raise_for_status() # 非2xx时抛出HTTPError异常
+
+    # 响应体
+    resp.text               # 字符串格式
+    resp.json()             # 自动解析JSON为dict/list
+    resp.content            # 二进制格式 (下载文件用)
+
+    # 响应头
+    resp.headers            # 响应头字典
+    resp.headers['Content-Type']
+
+    # 其他
+    resp.url                # 最终请求的URL
+    resp.elapsed            # 响应时间 (timedelta对象)
+    resp.elapsed.total_seconds()  # 响应时间(秒)
+    resp.cookies            # 响应Cookie
+    resp.encoding           # 编码
+    """)
+
+    # ---- 3. 接口断言模式 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("3. 接口测试断言模式:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    import requests
+
+    def test_get_user():
+        resp = requests.get('https://api.example.com/users/1')
+
+        # 断言状态码
+        assert resp.status_code == 200
+
+        # 断言响应时间 (接口性能)
+        assert resp.elapsed.total_seconds() < 3, '接口响应超过3秒'
+
+        # 断言响应体
+        data = resp.json()
+        assert data['code'] == 0, f"业务码错误: {data['code']}"
+        assert data['data']['name'] == '张三'
+        assert 'id' in data['data'], '响应缺少id字段'
+        assert isinstance(data['data']['age'], int), 'age应为整数'
+
+    def test_create_user():
+        payload = {'name': '新用户', 'age': 25}
+        resp = requests.post(
+            'https://api.example.com/users',
+            json=payload
+        )
+
+        assert resp.status_code == 201  # Created
+        data = resp.json()
+        assert data['data']['id'] > 0, '应返回新建用户ID'
+        assert data['data']['name'] == payload['name']
+    """)
+
+    # ---- 4. Session会话保持 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("4. Session会话保持:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    # Session可以自动保持Cookie，适合需要登录的接口测试
+
+    session = requests.Session()
+
+    # 登录 - Session自动保存Cookie
+    session.post('https://api.example.com/login', json={
+        'username': 'admin', 'password': '123456'
+    })
+
+    # 后续请求自动携带Cookie
+    resp = session.get('https://api.example.com/user/profile')
+    print(resp.json())
+
+    # 也可以设置公共请求头
+    session.headers.update({
+        'Authorization': 'Bearer token123',
+        'Content-Type': 'application/json'
+    })
+    """)
+
+    # ---- 5. 模拟实战演练 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("5. 模拟接口测试实战:")
+    # 模拟API响应
+    # 【类定义】
+    # 语法: class 类名:
+    # 作用: 创建对象模板，封装数据和方法
+    class MockResponse:
+        def __init__(self, status_code, json_data):
+            self.status_code = status_code
+            self._json = json_data
+            self.ok = 200 <= status_code < 400
+        def json(self):
+            return self._json
+
+    # 模拟GET请求
+    resp = MockResponse(200, {
+        'code': 0,
+        'message': 'success',
+        'data': {
+            'id': 1,
+            'name': '张三',
+            'age': 28
+        }
+    })
+
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print(f"状态码: {resp.status_code}")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print(f"是否成功: {resp.ok}")
+    data = resp.json()
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print(f"业务码: {data['code']}")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print(f"用户名: {data['data']['name']}")
+
+    # 断言验证
+    assert resp.status_code == 200, "状态码应为200"
+    assert data['code'] == 0, "业务码应为0"
+    assert data['data']['name'] == '张三', "用户名不匹配"
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n所有断言通过!")
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
 def practice_task():
     """实战任务"""
     # print() - 打印输出
@@ -1153,7 +1368,11 @@ def main():
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
-        print("9. 实战任务")
+        print("10. 补充：Requests实战练习")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("11. 实战任务")
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
@@ -1191,7 +1410,9 @@ def main():
             section8()
         if choice == "9":
             section9()
-        elif choice == "9":
+        if choice == "10":
+            section10()
+        elif choice == "11":
             practice_task()
         elif choice == "8":
             show_answer()

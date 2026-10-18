@@ -861,6 +861,490 @@ def section11():
         # 作用: 把内容输出到控制台
         print("  - pytest.ini (Pytest配置)")
 
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section12():
+    """第十二部分：Git基础（补充）"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第十二部分：Git基础（补充）")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+
+    # ---- 1. Git是什么 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n1. Git基本概念:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    Git 是分布式版本控制系统:
+    - 记录代码的每次修改历史
+    - 支持多人协作开发
+    - Jenkins CI/CD 从Git仓库拉取代码
+
+    核心概念:
+    ┌─────────────┐    git add    ┌─────────────┐   git commit  ┌─────────────┐
+    │  工作目录     │ ──────────> │  暂存区       │ ──────────> │  本地仓库     │
+    │ (Working Dir)│             │ (Staging)    │              │ (Repository) │
+    └─────────────┘             └─────────────┘              └─────────────┘
+                                                                    │
+                                                              git push
+                                                                    │
+                                                              ┌─────────────┐
+                                                              │  远程仓库     │
+                                                              │ (GitHub等)   │
+                                                              └─────────────┘
+    """)
+
+    # ---- 2. Git常用命令 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("2. Git常用命令:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    # ===== 初始配置 =====
+    git config --global user.name "你的名字"
+    git config --global user.email "你的邮箱"
+
+    # ===== 仓库操作 =====
+    git init                    # 初始化新仓库
+    git clone <url>             # 克隆远程仓库
+
+    # ===== 日常操作 (最常用) =====
+    git status                  # 查看文件状态
+    git add <file>              # 添加文件到暂存区
+    git add .                   # 添加所有修改
+    git commit -m "提交说明"     # 提交到本地仓库
+    git push                    # 推送到远程仓库
+    git pull                    # 拉取远程最新代码
+
+    # ===== 分支操作 =====
+    git branch                  # 查看分支
+    git branch <name>           # 创建分支
+    git checkout <name>         # 切换分支
+    git checkout -b <name>      # 创建并切换分支
+    git merge <name>            # 合并分支到当前分支
+
+    # ===== 查看历史 =====
+    git log                     # 查看提交历史
+    git log --oneline           # 简洁模式
+    git diff                    # 查看未暂存的修改
+    """)
+
+    # ---- 3. Git工作流 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("3. 自动化测试项目Git工作流:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    推荐的分支策略:
+
+    main/master ─── 稳定版本，Jenkins从这里拉取运行
+        │
+        ├── develop ─── 开发分支，日常开发在这里
+        │     │
+        │     ├── feature/login-test ─── 功能分支
+        │     ├── feature/api-test   ─── 功能分支
+        │     └── bugfix/fix-wait    ─── 修复分支
+        │
+        └── release/v1.0 ─── 发布分支
+
+    日常工作流程:
+    1. git pull                          # 拉取最新代码
+    2. git checkout -b feature/new-test  # 创建功能分支
+    3. (编写测试代码...)
+    4. git add .                         # 添加修改
+    5. git commit -m "add: 登录模块测试"  # 提交
+    6. git push -u origin feature/new-test  # 推送
+    7. 在GitHub/GitLab上创建Pull Request
+    8. 代码review后合并到develop
+
+    .gitignore 文件 (测试项目必备):
+    __pycache__/
+    *.pyc
+    .pytest_cache/
+    allure-results/
+    allure-report/
+    logs/
+    screenshots/
+    *.log
+    .env
+    venv/
+    """)
+
+    # ---- 4. Git与Jenkins集成 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("4. Git与Jenkins集成:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    Jenkins Pipeline中使用Git:
+
+    pipeline {
+        agent any
+        stages {
+            stage('拉取代码') {
+                steps {
+                    git branch: 'main',
+                        url: 'https://github.com/your/test-project.git',
+                        credentialsId: 'github-credentials'
+                }
+            }
+            stage('安装依赖') {
+                steps {
+                    sh 'pip install -r requirements.txt'
+                }
+            }
+            stage('运行测试') {
+                steps {
+                    sh 'pytest --alluredir=allure-results'
+                }
+            }
+            stage('生成报告') {
+                steps {
+                    allure includeProperties: false,
+                           results: [[path: 'allure-results']]
+                }
+            }
+        }
+    }
+
+    Webhook触发: 代码push后自动触发Jenkins构建
+    """)
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section13():
+    """第十三部分：综合实战项目（补充）"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第十三部分：综合实战项目（补充）")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    本部分将21天所学串联，搭建一个完整的App自动化测试项目。
+    以下是项目模板，请参考实现。
+    """)
+
+    # ---- 1. 项目结构 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("1. 完整项目结构:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    app_auto_test/
+    ├── config/
+    │   ├── config.yaml              # 全局配置 (Day 6, 16)
+    │   └── capabilities.yaml        # Appium配置 (Day 12)
+    ├── pages/
+    │   ├── base_page.py             # 基础页面类 (Day 14, 补充: 等待封装)
+    │   ├── login_page.py            # 登录页面 (Day 14)
+    │   └── home_page.py             # 首页 (Day 14)
+    ├── tests/
+    │   ├── conftest.py              # Pytest配置 (Day 9, 补充: conftest深入)
+    │   ├── test_login.py            # 登录测试 (Day 8, 10)
+    │   └── test_home.py             # 首页测试
+    ├── data/
+    │   ├── test_data.yaml           # 测试数据 (Day 16)
+    │   └── test_data.csv            # CSV测试数据 (Day 6)
+    ├── utils/
+    │   ├── logger.py                # 日志工具 (补充: logging)
+    │   ├── adb_helper.py            # ADB工具 (Day 19, 补充: subprocess)
+    │   ├── api_client.py            # 接口客户端 (Day 17, 补充: Requests)
+    │   └── config_reader.py         # 配置读取 (Day 6)
+    ├── reports/                      # Allure报告 (Day 11, 补充: Allure详解)
+    ├── logs/                         # 日志文件
+    ├── screenshots/                  # 截图
+    ├── pytest.ini                    # Pytest配置文件
+    ├── requirements.txt              # 依赖管理
+    ├── Jenkinsfile                   # CI/CD (Day 21)
+    ├── .gitignore                    # Git忽略 (补充: Git基础)
+    └── README.md                     # 项目说明
+    """)
+
+    # ---- 2. 核心文件示例 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("2. 核心文件代码示例:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    # ===== config/config.yaml =====
+    app:
+      platform: Android
+      device: emulator-5554
+      app_package: com.example.app
+      app_activity: .MainActivity
+
+    test:
+      implicit_wait: 10
+      explicit_wait: 15
+      screenshot_on_failure: true
+
+    api:
+      base_url: http://api.example.com
+      timeout: 30
+
+    # ===== utils/logger.py =====
+    import logging
+    import os
+    from datetime import datetime
+
+    def get_logger(name):
+        logger = logging.getLogger(name)
+        logger.setLevel(logging.INFO)
+
+        # 按日期创建日志文件
+        log_dir = 'logs'
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = os.path.join(
+            log_dir,
+            f'{datetime.now().strftime("%Y%m%d")}.log'
+        )
+
+        fh = logging.FileHandler(log_file, encoding='utf-8')
+        ch = logging.StreamHandler()
+
+        formatter = logging.Formatter(
+            '%(asctime)s [%(levelname)s] %(name)s - %(message)s'
+        )
+        fh.setFormatter(formatter)
+        ch.setFormatter(formatter)
+
+        if not logger.handlers:
+            logger.addHandler(fh)
+            logger.addHandler(ch)
+        return logger
+
+    # ===== pages/base_page.py =====
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from utils.logger import get_logger
+    import allure
+
+    class BasePage:
+        def __init__(self, driver):
+            self.driver = driver
+            self.wait = WebDriverWait(driver, 15)
+            self.logger = get_logger(self.__class__.__name__)
+
+        @allure.step('查找元素: {locator}')
+        def find(self, locator):
+            self.logger.info(f'查找元素: {locator}')
+            return self.wait.until(
+                EC.visibility_of_element_located(locator)
+            )
+
+        @allure.step('点击元素: {locator}')
+        def click(self, locator):
+            self.logger.info(f'点击: {locator}')
+            self.wait.until(
+                EC.element_to_be_clickable(locator)
+            ).click()
+
+        @allure.step('输入文本: {locator} -> {text}')
+        def input_text(self, locator, text):
+            self.logger.info(f'输入: {locator} -> {text}')
+            el = self.find(locator)
+            el.clear()
+            el.send_keys(text)
+    """)
+
+    # ---- 3. 测试文件示例 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("3. 测试文件示例:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    # ===== tests/conftest.py =====
+    import pytest
+    import allure
+    import yaml
+    from appium import webdriver
+
+    @pytest.fixture(scope='session')
+    def config():
+        with open('config/config.yaml', 'r') as f:
+            return yaml.safe_load(f)
+
+    @pytest.fixture(scope='session')
+    def driver(config):
+        caps = {
+            'platformName': config['app']['platform'],
+            'deviceName': config['app']['device'],
+            'appPackage': config['app']['app_package'],
+            'appActivity': config['app']['app_activity'],
+        }
+        driver = webdriver.Remote('http://localhost:4723/wd/hub', caps)
+        driver.implicitly_wait(config['test']['implicit_wait'])
+        yield driver
+        driver.quit()
+
+    @pytest.hookimpl(hookwrapper=True)
+    def pytest_runtest_makereport(item, call):
+        outcome = yield
+        report = outcome.get_result()
+        if report.when == 'call' and report.failed:
+            driver = item.funcargs.get('driver')
+            if driver:
+                allure.attach(
+                    driver.get_screenshot_as_png(),
+                    name=f'失败截图_{item.name}',
+                    attachment_type=allure.attachment_type.PNG
+                )
+
+    # ===== tests/test_login.py =====
+    import allure
+    import pytest
+    from pages.login_page import LoginPage
+
+    test_data = [
+        ('admin', 'admin123', True, '管理员登录'),
+        ('user1', 'pass123', True, '普通用户登录'),
+        ('wrong', 'wrong', False, '错误密码登录'),
+    ]
+
+    @allure.feature('用户管理')
+    @allure.story('登录功能')
+    class TestLogin:
+
+        @pytest.mark.parametrize(
+            'username,password,expected,desc', test_data,
+            ids=[d[3] for d in test_data]
+        )
+        @allure.severity(allure.severity_level.CRITICAL)
+        def test_login(self, driver, username, password, expected, desc):
+            allure.dynamic.title(desc)
+            login_page = LoginPage(driver)
+
+            with allure.step('输入用户名和密码'):
+                login_page.input_username(username)
+                login_page.input_password(password)
+
+            with allure.step('点击登录'):
+                login_page.click_login()
+
+            with allure.step('验证结果'):
+                if expected:
+                    assert login_page.is_login_success()
+                else:
+                    assert login_page.get_error_message()
+    """)
+
+    # ---- 4. 运行与报告 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("4. 运行测试与查看报告:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    # 安装依赖
+    pip install -r requirements.txt
+
+    # 运行所有测试
+    pytest --alluredir=./allure-results
+
+    # 运行指定模块
+    pytest tests/test_login.py --alluredir=./allure-results
+
+    # 按标记运行
+    pytest -m "smoke" --alluredir=./allure-results
+
+    # 生成Allure报告
+    allure serve ./allure-results
+
+    # Jenkins中运行 (Jenkinsfile已配置)
+    # 推送代码后自动触发
+    git add .
+    git commit -m "add: 登录模块自动化测试"
+    git push
+    """)
+
+    # ---- 5. 21天知识点回顾 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("5. 21天知识点在项目中的应用:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    ┌────────┬────────────────────┬─────────────────────────┐
+    │ 天数    │ 知识点              │ 在项目中的应用            │
+    ├────────┼────────────────────┼─────────────────────────┤
+    │ Day 1-5│ Python基础          │ 编写所有代码的基础        │
+    │ Day 6  │ 文件读写            │ 读取配置、测试数据        │
+    │ Day 7  │ 高级函数/装饰器      │ 封装工具函数             │
+    │ Day 8  │ Pytest入门          │ 编写测试用例             │
+    │ Day 9  │ Setup/Fixture       │ conftest.py配置         │
+    │ Day 10 │ 参数化测试          │ 数据驱动测试             │
+    │ Day 11 │ Pytest插件          │ 报告、重试、并行执行      │
+    │ Day 12 │ Appium入门          │ 移动端自动化基础         │
+    │ Day 13 │ Appium操作          │ 页面交互操作             │
+    │ Day 14 │ POM模式             │ 项目架构设计             │
+    │ Day 15 │ 项目结构            │ 目录组织规范             │
+    │ Day 16 │ 测试数据管理        │ YAML/CSV数据驱动         │
+    │ Day 17 │ HTTP基础            │ 接口测试                │
+    │ Day 18 │ 接口鉴权            │ API认证处理             │
+    │ Day 19 │ ADB基础             │ 设备管理和性能采集        │
+    │ Day 20 │ 性能监控            │ App性能测试             │
+    │ Day 21 │ Jenkins/Git         │ CI/CD自动化流水线        │
+    └────────┴────────────────────┴─────────────────────────┘
+
+    恭喜完成21天学习！接下来的建议:
+    1. 找一个真实的App项目练手
+    2. 从简单的冒烟测试开始
+    3. 逐步完善测试框架
+    4. 加入团队协作流程
+    """)
+
+
 # 【函数定义】
 # 语法: def 函数名(参数):
 # 作用: 封装可复用的代码块

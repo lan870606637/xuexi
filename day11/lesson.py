@@ -926,6 +926,200 @@ def section11():
     验证标准：能使用插件生成测试报告
     """
 
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section12():
+    """第十二部分：Allure报告详解（补充）"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第十二部分：Allure报告详解（补充）")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+
+    # ---- 1. Allure安装与基本使用 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n1. Allure安装与基本使用:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    安装:
+    pip install allure-pytest
+
+    # 还需安装Allure命令行工具:
+    # Windows: scoop install allure (或下载zip解压配置环境变量)
+    # Mac: brew install allure
+
+    运行测试并生成报告数据:
+    pytest --alluredir=./allure-results
+
+    生成HTML报告并打开:
+    allure serve ./allure-results
+
+    生成静态HTML报告:
+    allure generate ./allure-results -o ./allure-report --clean
+    """)
+
+    # ---- 2. Allure装饰器详解 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("2. Allure常用装饰器:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    import allure
+
+    # @allure.feature - 功能模块 (一级分类)
+    # @allure.story  - 用户故事 (二级分类)
+    # @allure.title  - 测试用例标题
+    # @allure.step   - 测试步骤
+    # @allure.severity - 严重程度
+
+    @allure.feature('用户管理')           # 功能模块
+    @allure.story('用户登录')             # 用户故事
+    @allure.title('测试正常登录流程')      # 用例标题
+    @allure.severity(allure.severity_level.CRITICAL)  # 严重程度
+    def test_login():
+        with allure.step('步骤1: 打开登录页'):
+            print('打开登录页')
+
+        with allure.step('步骤2: 输入用户名和密码'):
+            username = 'admin'
+            password = '123456'
+            print(f'输入: {username}/{password}')
+
+        with allure.step('步骤3: 点击登录按钮'):
+            print('点击登录')
+
+        with allure.step('步骤4: 验证登录成功'):
+            assert True, '登录成功'
+    """)
+
+    # ---- 3. 严重程度级别 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("3. 严重程度级别 (severity):")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    allure.severity_level.BLOCKER  - 阻塞: 功能完全不可用
+    allure.severity_level.CRITICAL - 严重: 核心功能受影响
+    allure.severity_level.NORMAL   - 普通: 一般功能问题 (默认)
+    allure.severity_level.MINOR    - 次要: 不影响主要功能
+    allure.severity_level.TRIVIAL  - 轻微: UI或文案问题
+
+    # 可以在命令行按严重程度过滤运行:
+    # pytest --allure-severities=critical,blocker
+    """)
+
+    # ---- 4. 添加附件（截图/日志） ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("4. 添加附件 (截图/日志):")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    import allure
+
+    # 方式1: 添加截图 (Appium/Selenium测试常用)
+    def take_screenshot(driver, name='screenshot'):
+        screenshot = driver.get_screenshot_as_png()
+        allure.attach(
+            screenshot,
+            name=name,
+            attachment_type=allure.attachment_type.PNG
+        )
+
+    # 方式2: 添加文本附件
+    allure.attach(
+        '这是日志内容',
+        name='测试日志',
+        attachment_type=allure.attachment_type.TEXT
+    )
+
+    # 方式3: 添加文件附件
+    allure.attach.file(
+        './logs/test.log',
+        name='完整日志',
+        attachment_type=allure.attachment_type.TEXT
+    )
+
+    # 方式4: 测试失败时自动截图 (conftest.py中)
+    @pytest.hookimpl(hookwrapper=True)
+    def pytest_runtest_makereport(item, call):
+        outcome = yield
+        report = outcome.get_result()
+        if report.when == 'call' and report.failed:
+            driver = item.funcargs.get('driver')
+            if driver:
+                allure.attach(
+                    driver.get_screenshot_as_png(),
+                    name=f'失败截图_{item.name}',
+                    attachment_type=allure.attachment_type.PNG
+                )
+    """)
+
+    # ---- 5. 完整示例 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("5. 完整Allure测试示例:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    import allure
+    import pytest
+
+    @allure.epic('电商App')
+    @allure.feature('购物车')
+    class TestShoppingCart:
+
+        @allure.story('添加商品')
+        @allure.title('测试添加单个商品到购物车')
+        @allure.severity(allure.severity_level.CRITICAL)
+        def test_add_item(self, driver):
+            with allure.step('搜索商品'):
+                # search_page.search('iPhone')
+                pass
+            with allure.step('点击添加到购物车'):
+                # product_page.add_to_cart()
+                pass
+            with allure.step('验证购物车数量'):
+                assert True  # cart_page.get_count() == 1
+
+        @allure.story('删除商品')
+        @allure.title('测试从购物车删除商品')
+        @allure.severity(allure.severity_level.NORMAL)
+        @pytest.mark.parametrize('product', ['iPhone', 'iPad'])
+        def test_remove_item(self, driver, product):
+            allure.dynamic.title(f'测试删除{product}')
+            with allure.step(f'添加{product}到购物车'):
+                pass
+            with allure.step(f'删除{product}'):
+                pass
+            with allure.step('验证购物车为空'):
+                assert True
+    """)
+
 # 【函数定义】
 # 语法: def 函数名(参数):
 # 作用: 封装可复用的代码块
@@ -1063,7 +1257,11 @@ def main():
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
-        print("9. 实战任务")
+        print("12. 补充：Allure报告详解")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("13. 实战任务")
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
@@ -1105,7 +1303,9 @@ def main():
             section10()
         if choice == "11":
             section11()
-        elif choice == "9":
+        if choice == "12":
+            section12()
+        elif choice == "13":
             practice_task()
         elif choice == "8":
             show_answer()

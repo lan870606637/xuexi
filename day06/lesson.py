@@ -693,6 +693,192 @@ def section8():
 # 语法: def 函数名(参数):
 # 作用: 封装可复用的代码块
 # 调用: 函数名(参数)
+def section9():
+    """第九部分：logging日志模块（补充）"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第九部分：logging日志模块（补充）")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+
+    # import - 导入模块
+    # 作用: 引入其他模块的功能使用
+    import logging
+    import os
+
+    # ---- 1. logging基本概念 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n1. logging模块基本概念:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    日志级别 (从低到高):
+    - DEBUG    (10): 调试信息，最详细的日志
+    - INFO     (20): 一般信息，确认程序按预期运行
+    - WARNING  (30): 警告信息，表示可能出现问题 (默认级别)
+    - ERROR    (40): 错误信息，程序某些功能无法执行
+    - CRITICAL (50): 严重错误，程序可能无法继续运行
+
+    为什么用logging而不是print?
+    - 可以控制日志级别，按需过滤
+    - 可以输出到文件，方便排查问题
+    - 可以格式化输出，包含时间、模块名等
+    - 自动化测试中用于记录测试执行过程
+    """)
+
+    # ---- 2. 基本配置 basicConfig ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("2. basicConfig基本配置:")
+    # 【logging.basicConfig】
+    # 语法: logging.basicConfig(level, format, filename, filemode)
+    # 作用: 配置日志的基本设置
+    # level: 设置日志级别
+    # format: 设置日志格式
+    # filename: 输出到文件
+    logging.basicConfig(
+        level=logging.DEBUG,  # 设置最低日志级别
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        # %(asctime)s  - 时间
+        # %(name)s     - logger名称
+        # %(levelname)s - 日志级别
+        # %(message)s  - 日志内容
+    )
+    # 获取logger对象
+    logger = logging.getLogger("TestLogger")
+
+    # 输出不同级别的日志
+    logger.debug("这是一条DEBUG日志 - 调试用")
+    logger.info("这是一条INFO日志 - 正常信息")
+    logger.warning("这是一条WARNING日志 - 警告")
+    logger.error("这是一条ERROR日志 - 出错了")
+    logger.critical("这是一条CRITICAL日志 - 严重错误")
+
+    # ---- 3. 自定义Logger ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n3. 自定义Logger (实际项目推荐):")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    在自动化测试项目中，通常自定义Logger:
+
+    import logging
+
+    def get_logger(name, log_file='test.log', level=logging.INFO):
+        # 创建logger
+        logger = logging.getLogger(name)
+        logger.setLevel(level)
+
+        # 创建文件处理器 - 日志写入文件
+        file_handler = logging.FileHandler(log_file, encoding='utf-8')
+        file_handler.setLevel(level)
+
+        # 创建控制台处理器 - 日志输出到控制台
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(level)
+
+        # 创建格式化器
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        file_handler.setFormatter(formatter)
+        console_handler.setFormatter(formatter)
+
+        # 添加处理器到logger
+        logger.addHandler(file_handler)
+        logger.addHandler(console_handler)
+
+        return logger
+
+    使用:
+    logger = get_logger('appium_test', 'logs/test.log')
+    logger.info('测试开始')
+    logger.error('元素未找到: login_button')
+    """)
+
+    # ---- 4. 在测试框架中使用logging ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("4. 在自动化测试中使用logging:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    # 在BasePage中集成logging:
+    class BasePage:
+        def __init__(self, driver):
+            self.driver = driver
+            self.logger = logging.getLogger(self.__class__.__name__)
+
+        def find_element(self, locator):
+            self.logger.info(f'查找元素: {locator}')
+            try:
+                element = self.driver.find_element(*locator)
+                self.logger.info(f'元素找到: {locator}')
+                return element
+            except Exception as e:
+                self.logger.error(f'元素未找到: {locator}, 错误: {e}')
+                raise
+
+        def click(self, locator):
+            self.logger.info(f'点击元素: {locator}')
+            self.find_element(locator).click()
+
+    # 在conftest.py中配置logging:
+    import pytest
+    import logging
+
+    @pytest.fixture(autouse=True)
+    def test_logger(request):
+        logger = logging.getLogger(request.node.name)
+        logger.info(f'===== 测试开始: {request.node.name} =====')
+        yield
+        logger.info(f'===== 测试结束: {request.node.name} =====')
+    """)
+
+    # ---- 5. 常用格式化变量 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("5. 常用格式化变量:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    %(asctime)s    - 日志时间 (2024-01-15 10:30:00,123)
+    %(name)s       - Logger名称
+    %(levelname)s  - 日志级别 (DEBUG/INFO/WARNING/ERROR/CRITICAL)
+    %(message)s    - 日志内容
+    %(filename)s   - 文件名
+    %(lineno)d     - 行号
+    %(funcName)s   - 函数名
+    %(pathname)s   - 文件完整路径
+
+    推荐格式:
+    '%(asctime)s [%(levelname)s] %(name)s.%(funcName)s:%(lineno)d - %(message)s'
+    输出: 2024-01-15 10:30:00 [INFO] LoginPage.click:25 - 点击登录按钮
+    """)
+
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
 def practice_task():
     """实战任务"""
     # print() - 打印输出
@@ -814,7 +1000,11 @@ def main():
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
-        print("9. 实战任务")
+        print("9. 补充：logging日志模块")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("10. 实战任务")
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
@@ -850,7 +1040,9 @@ def main():
             section7()
         if choice == "8":
             section8()
-        elif choice == "9":
+        if choice == "9":
+            section9()
+        elif choice == "10":
             practice_task()
         elif choice == "8":
             show_answer()

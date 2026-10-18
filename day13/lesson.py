@@ -1037,6 +1037,230 @@ def section9():
 # 语法: def 函数名(参数):
 # 作用: 封装可复用的代码块
 # 调用: 函数名(参数)
+def section10():
+    """第十部分：显式等待深入（补充）"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第十部分：显式等待深入（补充）")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+
+    # ---- 1. 三种等待方式对比 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n1. 三种等待方式对比:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    ┌──────────────┬────────────────────────────────────────┐
+    │ 等待方式      │ 说明                                   │
+    ├──────────────┼────────────────────────────────────────┤
+    │ time.sleep() │ 强制等待，固定时间，不推荐               │
+    │ 隐式等待      │ 全局设置，对所有find_element生效         │
+    │ 显式等待      │ 针对特定条件等待，最灵活，推荐使用        │
+    └──────────────┴────────────────────────────────────────┘
+
+    # 隐式等待 (全局设置一次)
+    driver.implicitly_wait(10)  # 最多等10秒
+
+    # 显式等待 (针对特定元素/条件)
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.common.by import By
+
+    wait = WebDriverWait(driver, 10, poll_frequency=0.5)
+    # driver: 浏览器/App驱动
+    # 10: 最长等待时间(秒)
+    # poll_frequency: 轮询间隔(秒)，默认0.5
+    """)
+
+    # ---- 2. Expected Conditions详解 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("2. Expected Conditions常用条件:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    from selenium.webdriver.support import expected_conditions as EC
+
+    # ---- 元素存在/可见 ----
+    # 等待元素出现在DOM中 (不一定可见)
+    EC.presence_of_element_located((By.ID, 'login_btn'))
+
+    # 等待元素可见 (出现在DOM中且可见)
+    EC.visibility_of_element_located((By.ID, 'login_btn'))
+
+    # 等待元素不可见
+    EC.invisibility_of_element_located((By.ID, 'loading'))
+
+    # ---- 元素可交互 ----
+    # 等待元素可点击 (可见且enabled)
+    EC.element_to_be_clickable((By.ID, 'submit_btn'))
+
+    # ---- 文本相关 ----
+    # 等待元素包含指定文本
+    EC.text_to_be_present_in_element((By.ID, 'status'), '成功')
+
+    # ---- 多个元素 ----
+    # 等待至少一个元素出现
+    EC.presence_of_all_elements_located((By.CLASS_NAME, 'item'))
+
+    # ---- 其他条件 ----
+    # 等待页面标题包含
+    EC.title_contains('首页')
+
+    # 等待Alert弹窗出现
+    EC.alert_is_present()
+    """)
+
+    # ---- 3. 实际使用示例 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("3. 实际使用示例:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.common.by import By
+
+    wait = WebDriverWait(driver, 10)
+
+    # 示例1: 等待登录按钮可点击后再点击
+    login_btn = wait.until(
+        EC.element_to_be_clickable((By.ID, 'com.app:id/login'))
+    )
+    login_btn.click()
+
+    # 示例2: 等待加载动画消失
+    wait.until(
+        EC.invisibility_of_element_located((By.ID, 'loading_spinner'))
+    )
+
+    # 示例3: 等待Toast提示出现
+    toast = wait.until(
+        EC.presence_of_element_located(
+            (By.XPATH, '//android.widget.Toast')
+        )
+    )
+    print(f'Toast内容: {toast.text}')
+
+    # 示例4: 等待列表加载完成
+    items = wait.until(
+        EC.presence_of_all_elements_located(
+            (By.CLASS_NAME, 'android.widget.TextView')
+        )
+    )
+    print(f'找到 {len(items)} 个元素')
+    """)
+
+    # ---- 4. 自定义等待条件 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("4. 自定义等待条件:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    # 当内置条件不满足需求时，可以自定义:
+
+    # 方式1: 使用lambda
+    wait.until(lambda d: d.find_element(By.ID, 'list').text != '加载中...')
+
+    # 方式2: 定义函数
+    def element_has_text(locator, text):
+        def _predicate(driver):
+            try:
+                element = driver.find_element(*locator)
+                return text in element.text
+            except:
+                return False
+        return _predicate
+
+    wait.until(element_has_text((By.ID, 'status'), '完成'))
+
+    # 方式3: 定义类 (更正式)
+    class ElementCountGreaterThan:
+        '''等待元素数量大于指定值'''
+        def __init__(self, locator, count):
+            self.locator = locator
+            self.count = count
+
+        def __call__(self, driver):
+            elements = driver.find_elements(*self.locator)
+            return len(elements) > self.count
+
+    # 等待列表元素超过5个
+    wait.until(ElementCountGreaterThan((By.CLASS_NAME, 'item'), 5))
+    """)
+
+    # ---- 5. BasePage中封装等待 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("5. 在BasePage中封装等待 (最佳实践):")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    class BasePage:
+        def __init__(self, driver, timeout=10):
+            self.driver = driver
+            self.wait = WebDriverWait(driver, timeout)
+
+        def wait_for_visible(self, locator):
+            '''等待元素可见'''
+            return self.wait.until(
+                EC.visibility_of_element_located(locator)
+            )
+
+        def wait_for_clickable(self, locator):
+            '''等待元素可点击'''
+            return self.wait.until(
+                EC.element_to_be_clickable(locator)
+            )
+
+        def wait_for_invisible(self, locator):
+            '''等待元素消失 (如loading)'''
+            return self.wait.until(
+                EC.invisibility_of_element_located(locator)
+            )
+
+        def safe_click(self, locator):
+            '''安全点击: 先等待可点击再点击'''
+            element = self.wait_for_clickable(locator)
+            element.click()
+
+        def safe_input(self, locator, text):
+            '''安全输入: 先等待可见再输入'''
+            element = self.wait_for_visible(locator)
+            element.clear()
+            element.send_keys(text)
+
+    常见坑:
+    - 隐式等待和显式等待不要混用，可能导致等待时间不可预期
+    - TimeoutException不要吞掉，要让测试明确失败
+    - poll_frequency不要设太小 (如0.01)，会浪费CPU
+    """)
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
 def practice_task():
     """实战任务"""
     # print() - 打印输出
@@ -1162,7 +1386,11 @@ def main():
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
-        print("9. 实战任务")
+        print("10. 补充：显式等待深入")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("11. 实战任务")
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
@@ -1200,7 +1428,9 @@ def main():
             section8()
         if choice == "9":
             section9()
-        elif choice == "9":
+        if choice == "10":
+            section10()
+        elif choice == "11":
             practice_task()
         elif choice == "8":
             show_answer()

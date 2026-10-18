@@ -896,6 +896,211 @@ def section10():
     验证标准：能写出带fixture的测试用例
     """
 
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
+def section11():
+    """第十一部分：conftest.py深入使用（补充）"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第十一部分：conftest.py深入使用（补充）")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+
+    # ---- 1. conftest.py是什么 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n1. conftest.py核心概念:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    conftest.py 是 Pytest 的特殊文件:
+    - 不需要 import，Pytest 自动加载
+    - 可以定义 fixture 供同目录及子目录的测试文件使用
+    - 可以存在多个，每个目录都可以有自己的 conftest.py
+    - 用于共享测试配置、fixture、hook函数
+
+    项目结构示例:
+    project/
+    ├── conftest.py          # 根级 - 全局fixture (如driver初始化)
+    ├── tests/
+    │   ├── conftest.py      # tests级 - 通用测试fixture
+    │   ├── test_login/
+    │   │   ├── conftest.py  # 模块级 - 登录相关fixture
+    │   │   └── test_login.py
+    │   └── test_home/
+    │       ├── conftest.py  # 模块级 - 首页相关fixture
+    │       └── test_home.py
+    """)
+
+    # ---- 2. 多层级conftest示例 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("2. 多层级conftest共享fixture:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    # ===== 根目录 conftest.py =====
+    import pytest
+
+    @pytest.fixture(scope='session')
+    def app_config():
+        '''整个测试会话共享的配置'''
+        return {
+            'base_url': 'http://api.example.com',
+            'timeout': 30,
+            'platform': 'Android'
+        }
+
+    @pytest.fixture(scope='session')
+    def driver(app_config):
+        '''整个测试会话共享的driver'''
+        # 初始化Appium driver
+        print(f"初始化driver, 平台: {app_config['platform']}")
+        driver = "模拟的driver对象"
+        yield driver
+        # teardown: 关闭driver
+        print("关闭driver")
+
+    # ===== tests/conftest.py =====
+    import pytest
+
+    @pytest.fixture(autouse=True)
+    def log_test_info(request):
+        '''自动记录每个测试的开始和结束'''
+        print(f"\\n>>> 开始测试: {request.node.name}")
+        yield
+        print(f"<<< 结束测试: {request.node.name}")
+
+    @pytest.fixture
+    def test_data():
+        '''通用测试数据'''
+        return {'username': 'test_user', 'password': '123456'}
+
+    # ===== tests/test_login/conftest.py =====
+    import pytest
+
+    @pytest.fixture
+    def login_page(driver):
+        '''登录页面对象 - 仅登录测试模块可用'''
+        print("进入登录页面")
+        return "LoginPage对象"
+    """)
+
+    # ---- 3. conftest.py中的Hook函数 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("3. conftest.py中的Hook函数:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    # 在conftest.py中定义hook，自定义Pytest行为:
+
+    # Hook 1: 测试失败时自动截图
+    @pytest.hookimpl(hookwrapper=True)
+    def pytest_runtest_makereport(item, call):
+        outcome = yield
+        report = outcome.get_result()
+        if report.when == 'call' and report.failed:
+            # 获取driver fixture
+            driver = item.funcargs.get('driver')
+            if driver:
+                # 截图保存
+                screenshot_path = f'screenshots/{item.name}.png'
+                driver.save_screenshot(screenshot_path)
+                print(f"截图已保存: {screenshot_path}")
+
+    # Hook 2: 自定义命令行参数
+    def pytest_addoption(parser):
+        parser.addoption(
+            '--env',
+            default='test',
+            help='运行环境: test/staging/prod'
+        )
+        parser.addoption(
+            '--platform',
+            default='Android',
+            help='测试平台: Android/iOS'
+        )
+
+    # 将命令行参数转为fixture
+    @pytest.fixture(scope='session')
+    def env(request):
+        return request.config.getoption('--env')
+
+    # 使用: pytest --env=staging --platform=iOS
+    """)
+
+    # ---- 4. fixture的参数化与组合 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("4. fixture的参数化与组合:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    # fixture参数化 - 一个fixture产生多组数据
+    @pytest.fixture(params=[
+        {'username': 'admin', 'password': 'admin123'},
+        {'username': 'user1', 'password': 'pass123'},
+        {'username': 'guest', 'password': 'guest'},
+    ], ids=['管理员账号', '普通用户', '访客账号'])
+    def user_credentials(request):
+        '''参数化的用户凭证'''
+        return request.param
+
+    # 测试函数会运行3次，每次使用不同的凭证
+    def test_login(user_credentials):
+        print(f"测试登录: {user_credentials['username']}")
+
+    # fixture组合 - 多个fixture协作
+    @pytest.fixture
+    def logged_in_user(driver, test_data):
+        '''组合driver和test_data，返回已登录状态'''
+        # 使用test_data登录
+        print(f"登录用户: {test_data['username']}")
+        return {'driver': driver, 'user': test_data['username']}
+
+    # 使用组合fixture
+    def test_user_profile(logged_in_user):
+        print(f"测试用户主页: {logged_in_user['user']}")
+    """)
+
+    # ---- 5. 最佳实践 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("5. conftest.py最佳实践:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    ✓ 根目录conftest.py: 放全局fixture (driver, config, logging)
+    ✓ 模块目录conftest.py: 放模块专属fixture (page对象)
+    ✓ 使用scope控制fixture生命周期 (session > module > class > function)
+    ✓ autouse=True 只用于确实需要全局生效的fixture
+    ✓ 给fixture加清晰的docstring
+    ✗ 不要在conftest.py中写测试函数
+    ✗ 不要在conftest.py中import测试文件
+    ✗ 不要把所有fixture都堆在根conftest.py中
+    """)
+
 # 【函数定义】
 # 语法: def 函数名(参数):
 # 作用: 封装可复用的代码块
@@ -1029,7 +1234,11 @@ def main():
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
-        print("9. 实战任务")
+        print("11. 补充：conftest.py深入使用")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("12. 实战任务")
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
@@ -1069,7 +1278,9 @@ def main():
             section9()
         if choice == "10":
             section10()
-        elif choice == "9":
+        if choice == "11":
+            section11()
+        elif choice == "12":
             practice_task()
         elif choice == "8":
             show_answer()

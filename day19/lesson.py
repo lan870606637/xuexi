@@ -878,6 +878,261 @@ def section8():
 # 语法: def 函数名(参数):
 # 作用: 封装可复用的代码块
 # 调用: 函数名(参数)
+def section9():
+    """第九部分：subprocess模块调用ADB（补充）"""
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n" + "="*60)
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("第九部分：subprocess模块调用ADB（补充）")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("="*60)
+
+    # import - 导入模块
+    # 作用: 引入其他模块的功能使用
+    import subprocess
+
+    # ---- 1. subprocess基础 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n1. subprocess基础:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    subprocess模块用于在Python中执行系统命令
+    在自动化测试中，常用来调用ADB命令控制Android设备
+
+    核心方法:
+    - subprocess.run()       : 执行命令并等待完成 (推荐)
+    - subprocess.Popen()     : 更灵活的进程管理
+    - subprocess.getoutput() : 快速获取命令输出
+    """)
+
+    # ---- 2. subprocess.run() 详解 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("2. subprocess.run() 详解:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    import subprocess
+
+    # 基本用法
+    result = subprocess.run(
+        ['adb', 'devices'],       # 命令列表
+        capture_output=True,       # 捕获输出
+        text=True,                 # 以字符串返回 (而非bytes)
+        timeout=30                 # 超时时间(秒)
+    )
+
+    # 获取结果
+    result.returncode  # 返回码 (0=成功)
+    result.stdout      # 标准输出
+    result.stderr      # 错误输出
+
+    # 也可以用shell=True执行命令字符串 (不推荐，有安全风险)
+    result = subprocess.run(
+        'adb devices',
+        shell=True,
+        capture_output=True,
+        text=True
+    )
+    """)
+
+    # 演示: 执行一个简单命令
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("演示 - 执行系统命令:")
+    # 【try-except 异常处理】
+    # 语法: try: 可能出错的代码 except 异常类型: 处理代码
+    # 作用: 捕获并处理异常，防止程序崩溃
+    try:
+        result = subprocess.run(
+            ['python', '--version'],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print(f"  返回码: {result.returncode}")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print(f"  输出: {result.stdout.strip()}")
+    except FileNotFoundError:
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("  命令未找到")
+    except subprocess.TimeoutExpired:
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("  命令超时")
+
+    # ---- 3. 封装ADB工具类 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("\n3. 封装ADB工具类:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    import subprocess
+
+    class ADBHelper:
+        '''ADB命令封装工具类'''
+
+        def __init__(self, device_id=None):
+            self.device_id = device_id
+            self.base_cmd = ['adb']
+            if device_id:
+                self.base_cmd += ['-s', device_id]
+
+        def run_cmd(self, args):
+            '''执行ADB命令并返回输出'''
+            cmd = self.base_cmd + args
+            try:
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                if result.returncode != 0:
+                    print(f'ADB错误: {result.stderr}')
+                return result.stdout.strip()
+            except subprocess.TimeoutExpired:
+                print(f'ADB命令超时: {" ".join(cmd)}')
+                return ''
+
+        def get_devices(self):
+            '''获取已连接设备列表'''
+            output = self.run_cmd(['devices'])
+            devices = []
+            for line in output.split('\\n')[1:]:
+                if '\\t' in line:
+                    devices.append(line.split('\\t')[0])
+            return devices
+
+        def install_app(self, apk_path):
+            '''安装APK'''
+            return self.run_cmd(['install', '-r', apk_path])
+
+        def uninstall_app(self, package):
+            '''卸载应用'''
+            return self.run_cmd(['uninstall', package])
+
+        def start_app(self, package, activity):
+            '''启动应用'''
+            component = f'{package}/{activity}'
+            return self.run_cmd(['shell', 'am', 'start', '-n', component])
+
+        def stop_app(self, package):
+            '''停止应用'''
+            return self.run_cmd(['shell', 'am', 'force-stop', package])
+
+        def get_current_activity(self):
+            '''获取当前Activity'''
+            output = self.run_cmd([
+                'shell', 'dumpsys', 'activity', 'activities'
+            ])
+            for line in output.split('\\n'):
+                if 'mResumedActivity' in line:
+                    return line.strip()
+            return ''
+
+        def screenshot(self, save_path):
+            '''截图'''
+            self.run_cmd(['shell', 'screencap', '-p', '/sdcard/screen.png'])
+            self.run_cmd(['pull', '/sdcard/screen.png', save_path])
+            return save_path
+
+        def get_log(self, tag=None, level='I'):
+            '''获取logcat日志'''
+            cmd = ['logcat', '-d']
+            if tag:
+                cmd += ['-s', f'{tag}:{level}']
+            return self.run_cmd(cmd)
+
+        def push_file(self, local, remote):
+            '''推送文件到设备'''
+            return self.run_cmd(['push', local, remote])
+
+        def pull_file(self, remote, local):
+            '''从设备拉取文件'''
+            return self.run_cmd(['pull', remote, local])
+
+    # 使用示例:
+    # adb = ADBHelper('emulator-5554')
+    # devices = adb.get_devices()
+    # adb.install_app('./app-debug.apk')
+    # adb.start_app('com.example.app', '.MainActivity')
+    # adb.screenshot('./screenshots/home.png')
+    """)
+
+    # ---- 4. subprocess.Popen 长时间运行 ----
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("4. Popen处理长时间运行的命令:")
+    # print() - 打印输出
+    # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+    # 作用: 把内容输出到控制台
+    print("""
+    import subprocess
+    import time
+
+    # 实时读取logcat输出 (持续运行的命令)
+    def monitor_logcat(package, duration=10):
+        '''实时监控logcat日志'''
+        process = subprocess.Popen(
+            ['adb', 'logcat', '-s', f'{package}:I'],
+            stdout=subprocess.PIPE,
+            text=True
+        )
+
+        start = time.time()
+        try:
+            while time.time() - start < duration:
+                line = process.stdout.readline()
+                if line:
+                    print(f'[LOG] {line.strip()}')
+        finally:
+            process.terminate()  # 终止进程
+            process.wait()       # 等待进程结束
+
+    # 性能数据采集 (后台运行)
+    def collect_fps(package, output_file):
+        '''后台采集FPS数据'''
+        process = subprocess.Popen(
+            ['adb', 'shell', 'dumpsys', 'gfxinfo', package],
+            stdout=subprocess.PIPE,
+            text=True
+        )
+        stdout, _ = process.communicate(timeout=10)
+        with open(output_file, 'w') as f:
+            f.write(stdout)
+        return output_file
+    """)
+
+# 【函数定义】
+# 语法: def 函数名(参数):
+# 作用: 封装可复用的代码块
+# 调用: 函数名(参数)
 def practice_task():
     """实战任务"""
     # print() - 打印输出
@@ -999,7 +1254,11 @@ def main():
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
-        print("9. 实战任务")
+        print("9. 补充：subprocess调用ADB")
+        # print() - 打印输出
+        # 语法: print(值1, 值2, ..., sep=" ", end="\n")
+        # 作用: 把内容输出到控制台
+        print("10. 实战任务")
         # print() - 打印输出
         # 语法: print(值1, 值2, ..., sep=" ", end="\n")
         # 作用: 把内容输出到控制台
@@ -1035,7 +1294,9 @@ def main():
             section7()
         if choice == "8":
             section8()
-        elif choice == "9":
+        if choice == "9":
+            section9()
+        elif choice == "10":
             practice_task()
         elif choice == "8":
             show_answer()
